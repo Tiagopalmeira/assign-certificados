@@ -1,0 +1,93 @@
+/* Tokens de design — padrão corporativo sóbrio, azul-marinho.
+   Importe uma vez no CSS global e use apenas estas variáveis nos componentes. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* Cores */
+  --cor-primaria: #1F3A5F;
+  --cor-primaria-forte: #162C49;
+  --cor-primaria-suave: #EAF0F6;
+
+  --cor-texto: #1B2430;
+  --cor-texto-secundario: #5B6575;
+  --cor-texto-inverso: #FFFFFF;
+
+  --cor-borda: #DCE1E7;
+  --cor-fundo: #FFFFFF;
+  --cor-fundo-alt: #F5F7FA;
+
+  --cor-sucesso: #1E7A4C;
+  --cor-sucesso-suave: #E7F4EC;
+  --cor-erro: #B42318;
+  --cor-erro-suave: #FDECEA;
+  --cor-aviso: #A15C07;
+  --cor-aviso-suave: #FDF3E1;
+
+  /* Tipografia */
+  --fonte: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --texto-xs: 0.75rem;   /* 12px — legendas mínimas */
+  --texto-sm: 0.875rem;  /* 14px — apoio, rótulos */
+  --texto-md: 1rem;      /* 16px — corpo */
+  --texto-lg: 1.25rem;   /* 20px — subtítulos */
+  --texto-xl: 1.5rem;    /* 24px — título de seção */
+  --texto-2xl: 2rem;     /* 32px — título da página */
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-forte: 600;
+  --altura-linha: 1.5;
+  --altura-linha-titulo: 1.25;
+
+  /* Espaçamento (base 4px) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --esp-7: 40px;
+  --esp-8: 48px;
+  --esp-9: 64px;
+
+  /* Formas */
+  --raio-sm: 4px;
+  --raio: 6px;
+  --raio-lg: 8px;
+  --sombra: 0 4px 16px rgba(27, 36, 48, 0.12); /* só para elementos flutuantes */
+
+  /* Larguras de conteúdo */
+  --largura-form: 480px;
+  --largura-texto: 720px;
+  --largura-pagina: 1120px;
+
+  /* Movimento */
+  --transicao: 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --transicao: 0ms; }
+}
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--fonte);
+  font-size: var(--texto-md);
+  line-height: var(--altura-linha);
+  color: var(--cor-texto);
+  background: var(--cor-fundo-alt);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  margin: 0;
+  font-weight: var(--peso-forte);
+  line-height: var(--altura-linha-titulo);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 2px;
+}
