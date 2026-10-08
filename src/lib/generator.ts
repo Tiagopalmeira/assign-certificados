@@ -34,7 +34,8 @@ import { FAUX_BOLD_STROKE, FAUX_ITALIC_SKEW, LAYOUT_FEATURES, loadFontBytes, loa
 import { fontkit } from './fontkit'
 import { containRect, layoutText } from './textLayout'
 import { colorRuns } from './colorRuns'
-import { titleOf, type ColorWord, type GraduationSystem } from './graduationSystems'
+import type { ColorWord, GraduationSystem } from './graduationSystems'
+import { studentValues } from './values'
 import { signatureBoxes, type Box } from './geometry'
 import { sanitizeFileName, uniqueFileNames } from './filename'
 
@@ -274,15 +275,7 @@ async function addCertificatePage(
   if (res.background?.kind === 'page') page.drawPage(res.background.page, fullPage)
   else if (res.background?.kind === 'image') page.drawImage(res.background.image, fullPage)
 
-  const values: CertificateValues = {
-    name: student.name,
-    graduation: student.graduation,
-    graduationTitle: titleOf(input.graduationSystem, student.graduation),
-    graduationPalette: input.graduationSystem?.colors ?? [],
-    date: input.date,
-    location: input.location,
-    signerName: input.signerName,
-  }
+  const values = studentValues(student, input.graduationSystem, input)
 
   // Inverte o eixo Y para trabalhar com a origem no topo, como no editor.
   page.pushOperators(pushGraphicsState(), concatTransformationMatrix(1, 0, 0, -1, 0, template.height))

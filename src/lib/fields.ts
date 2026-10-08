@@ -1,6 +1,6 @@
 import type { CertificateField, CertificateValues, FieldType, TemplateDefaults } from '@/types'
 import { createId } from './ids'
-import type { GraduationSystem } from './graduationSystems'
+import { previousLevelOf, titleOf, type GraduationSystem } from './graduationSystems'
 
 export const DEFAULT_FONT_FAMILY = 'Inter'
 
@@ -13,6 +13,7 @@ export interface FieldTypeInfo {
 export const FIELD_TYPES: readonly FieldTypeInfo[] = [
   { type: 'name', label: 'Nome', description: 'Nome do aluno, muda em cada certificado' },
   { type: 'graduation', label: 'Graduação', description: 'Graduação do aluno, escolhida na lista' },
+  { type: 'previous-graduation', label: 'Graduação anterior', description: 'Graduação de onde o aluno veio' },
   { type: 'date', label: 'Data', description: 'Data do evento' },
   { type: 'location', label: 'Local', description: 'Cidade ou local do evento' },
   { type: 'signature', label: 'Assinatura', description: 'Imagem da assinatura e nome de quem assina' },
@@ -42,11 +43,14 @@ function sampleLevel(system: GraduationSystem | null | undefined) {
 /** Valores de exemplo usados no editor e nas miniaturas. */
 export function sampleValues(defaults: TemplateDefaults, system?: GraduationSystem | null): CertificateValues {
   const level = sampleLevel(system)
+  const previous = system ? previousLevelOf(system, level.name) : 'Verde'
   return {
     name: 'Maria Oliveira Santos',
     graduation: level.name,
     graduationTitle: level.title,
-    graduationPalette: system?.colors ?? [{ word: 'Azul', hex: '#1D4FB8' }],
+    previousGraduation: previous,
+    previousGraduationTitle: titleOf(system, previous),
+    graduationPalette: system?.colors ?? [{ word: 'Azul', hex: '#1D4FB8' }, { word: 'Verde', hex: '#1B8A3C' }],
     date: defaults.date,
     location: defaults.location,
     signerName: defaults.signerName,
@@ -59,6 +63,7 @@ export function createField(type: FieldType, pageWidth: number, pageHeight: numb
   const sizes: Record<FieldType, { w: number; h: number; font: number; bold: boolean }> = {
     name: { w: 60, h: 8, font: 4.2, bold: true },
     graduation: { w: 30, h: 5, font: 2.4, bold: false },
+    'previous-graduation': { w: 30, h: 5, font: 2.4, bold: false },
     date: { w: 22, h: 4, font: 1.9, bold: false },
     location: { w: 26, h: 4, font: 1.9, bold: false },
     signature: { w: 24, h: 10, font: 1.6, bold: false },

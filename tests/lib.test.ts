@@ -70,6 +70,8 @@ describe('resolveFieldText', () => {
     name: 'João da Silva',
     graduation: 'Verde',
     graduationTitle: '',
+    previousGraduation: 'Amarelo',
+    previousGraduationTitle: '',
     graduationPalette: [],
     date: '2026-10-02',
     location: 'Araçás - BA',
@@ -133,7 +135,7 @@ describe('resolveFont', () => {
 })
 
 describe('graduação no certificado', () => {
-  const values = { name: 'Ana', graduation: 'Branco e Azul', graduationTitle: 'Contramestre', graduationPalette: [], date: '', location: '', signerName: '' }
+  const values = { name: 'Ana', graduation: 'Branco e Azul', graduationTitle: 'Contramestre', previousGraduation: 'Branco e Amarelo', previousGraduationTitle: 'Professor', graduationPalette: [], date: '', location: '', signerName: '' }
   const field = createField('graduation', 842, 595)
 
   it('mostra graduação e título por padrão', () => {
@@ -154,6 +156,29 @@ describe('graduação no certificado', () => {
   })
   it('{titulo} no campo Texto', () => {
     expect(resolveFieldText({ ...createField('text', 842, 595), text: '{graduacao} ({titulo})' }, values)).toBe('Branco e Azul (Contramestre)')
+  })
+})
+
+describe('graduação anterior no certificado', () => {
+  const values = { name: 'Ana', graduation: 'Branco e Azul', graduationTitle: 'Contramestre', previousGraduation: 'Branco e Amarelo', previousGraduationTitle: 'Professor', graduationPalette: [], date: '', location: '', signerName: '' }
+  const field = createField('previous-graduation', 842, 595)
+
+  it('mostra a graduação anterior com o título dela', () => {
+    expect(resolveFieldText(field, values)).toBe('Branco e Amarelo - Professor')
+    expect(resolveFieldText({ ...field, graduationDisplay: 'graduation' }, values)).toBe('Branco e Amarelo')
+  })
+  it('fica vazio quando o aluno não tem graduação anterior', () => {
+    expect(resolveFieldText({ ...field, prefix: 'de ' }, { ...values, previousGraduation: '', previousGraduationTitle: '' })).toBe('')
+  })
+  it('{graduacao_anterior} no campo Texto', () => {
+    const text = { ...createField('text', 842, 595), text: 'de {graduacao_anterior} para {graduacao}' }
+    expect(resolveFieldText(text, values)).toBe('de Branco e Amarelo para Branco e Azul')
+  })
+  it('pinta as cores como o campo Graduação', () => {
+    const palette = [{ word: 'Branco', hex: '#FFFFFF' }, { word: 'Amarelo', hex: '#F2C200' }]
+    const metrics: FontMetrics = { measure: (t, s) => t.length * s * 0.5, ascent: 0.8, descent: 0.2 }
+    const runs = colorRuns({ ...field, style: { ...field.style, color: '#000000' } }, 'Branco e Amarelo', 10, 0, metrics, palette)
+    expect(runs.map((r) => r.color)).toEqual(['#FFFFFF', '#000000', '#F2C200'])
   })
 })
 

@@ -8,12 +8,14 @@ const PLACEHOLDERS: Record<string, (values: CertificateValues, field: Certificat
   'graduação': (v) => v.graduation,
   titulo: (v) => v.graduationTitle,
   'título': (v) => v.graduationTitle,
+  graduacao_anterior: (v) => v.previousGraduation,
+  'graduação_anterior': (v) => v.previousGraduation,
   data: (v, f) => formatDate(v.date, f.dateFormat),
   local: (v) => v.location,
   assinatura: (v) => v.signerName,
 }
 
-export const PLACEHOLDER_HELP = '{nome}, {graduacao}, {titulo}, {data}, {local}, {assinatura}'
+export const PLACEHOLDER_HELP = '{nome}, {graduacao}, {graduacao_anterior}, {titulo}, {data}, {local}, {assinatura}'
 
 function fillPlaceholders(text: string, values: CertificateValues, field: CertificateField): string {
   return text.replace(/\{([^{}]+)\}/g, (match, key: string) => {
@@ -23,11 +25,19 @@ function fillPlaceholders(text: string, values: CertificateValues, field: Certif
 }
 
 /** Graduação como o campo pede. Sem título, mostra a graduação em qualquer opção. */
-export function graduationText(field: CertificateField, values: CertificateValues): string {
+function levelText(field: CertificateField, name: string, title: string): string {
   const display = field.graduationDisplay ?? 'graduation-title'
-  if (display === 'graduation' || !values.graduationTitle) return values.graduation
-  if (display === 'title') return values.graduationTitle
-  return graduationLabel(values.graduation, values.graduationTitle)
+  if (display === 'graduation' || !title) return name
+  if (display === 'title') return title
+  return graduationLabel(name, title)
+}
+
+export function graduationText(field: CertificateField, values: CertificateValues): string {
+  return levelText(field, values.graduation, values.graduationTitle)
+}
+
+export function previousGraduationText(field: CertificateField, values: CertificateValues): string {
+  return levelText(field, values.previousGraduation, values.previousGraduationTitle)
 }
 
 function withAffixes(field: CertificateField, value: string): string {
@@ -45,6 +55,8 @@ export function resolveFieldText(field: CertificateField, values: CertificateVal
       return withAffixes(field, values.name)
     case 'graduation':
       return withAffixes(field, graduationText(field, values))
+    case 'previous-graduation':
+      return withAffixes(field, previousGraduationText(field, values))
     case 'date':
       return withAffixes(field, formatDate(values.date, field.dateFormat))
     case 'location':

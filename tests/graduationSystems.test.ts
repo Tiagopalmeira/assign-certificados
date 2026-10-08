@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   GRADUATION_PRESETS,
   graduationLabel,
+  previousLevelOf,
   systemFromLegacyList,
   systemFromPreset,
   titleOf,
 } from '@/lib/graduationSystems'
+import { studentValues } from '@/lib/values'
 
 describe('modelos prontos de graduação', () => {
   it('têm Capoeira, Judô, Jiu-Jitsu (adulto e infantil) e Karatê', () => {
@@ -71,5 +73,30 @@ describe('sistemas', () => {
     expect(system.colors.map((c) => c.word)).toContain('Branco')
     expect(systemFromLegacyList([])).toBeNull()
     expect(systemFromLegacyList('x')).toBeNull()
+  })
+})
+
+describe('graduação anterior', () => {
+  const capoeira = systemFromPreset(GRADUATION_PRESETS[0])
+  const event = { date: '2026-10-08', location: 'Araçás - BA', signerName: '' }
+
+  it('é a graduação que vem antes no sistema', () => {
+    expect(previousLevelOf(capoeira, 'Verde e Amarelo')).toBe('Azul')
+    expect(previousLevelOf(capoeira, 'Branco')).toBe('Branco e Azul')
+  })
+  it('fica vazia na primeira graduação ou numa que não está no sistema', () => {
+    expect(previousLevelOf(capoeira, 'Iniciante')).toBe('')
+    expect(previousLevelOf(capoeira, 'Roxa')).toBe('')
+    expect(previousLevelOf(null, 'Verde')).toBe('')
+  })
+  it('entra nos valores do certificado, com o título', () => {
+    const values = studentValues({ name: 'Ana', graduation: 'Branco' }, capoeira, event)
+    expect(values.previousGraduation).toBe('Branco e Azul')
+    expect(values.previousGraduationTitle).toBe('Contramestre')
+    expect(values.graduationTitle).toBe('Mestre')
+  })
+  it('a escolhida no lote vale mais que a do sistema, inclusive vazia', () => {
+    expect(studentValues({ name: 'Ana', graduation: 'Branco', previousGraduation: 'Azul' }, capoeira, event).previousGraduation).toBe('Azul')
+    expect(studentValues({ name: 'Ana', graduation: 'Branco', previousGraduation: '' }, capoeira, event).previousGraduation).toBe('')
   })
 })

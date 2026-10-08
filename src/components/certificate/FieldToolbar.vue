@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Calendar, Image, MapPin, Medal, PenLine, Type, User } from 'lucide-vue-next'
+import { Calendar, History, Image, MapPin, Medal, PenLine, Type, User } from 'lucide-vue-next'
 import type { FieldType } from '@/types'
 import { FIELD_TYPES, fieldLabel } from '@/lib/fields'
 import { resolveFieldText } from '@/lib/fieldText'
@@ -10,6 +10,7 @@ const editor = useTemplateEditor()
 const ICONS: Record<FieldType, unknown> = {
   name: User,
   graduation: Medal,
+  'previous-graduation': History,
   date: Calendar,
   location: MapPin,
   signature: PenLine,
@@ -24,6 +25,8 @@ function summary(fieldId: string) {
     name: 'nome',
     graduation: 'graduação',
     graduationTitle: 'título',
+    previousGraduation: 'graduação anterior',
+    previousGraduationTitle: '',
     graduationPalette: [],
     date: editor.template.value.defaults.date,
     location: editor.template.value.defaults.location,

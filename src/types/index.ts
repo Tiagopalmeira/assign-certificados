@@ -1,7 +1,7 @@
 import type { ColorWord } from '@/lib/graduationSystems'
 
 /** Tipos de campo que podem ser posicionados sobre o modelo. */
-export type FieldType = 'name' | 'graduation' | 'date' | 'location' | 'signature' | 'text' | 'image'
+export type FieldType = 'name' | 'graduation' | 'previous-graduation' | 'date' | 'location' | 'signature' | 'text' | 'image'
 
 export type TextAlign = 'left' | 'center' | 'right'
 
@@ -44,9 +44,9 @@ export interface CertificateField {
   /** Conteúdo do campo "Texto". Aceita {nome}, {graduacao}, {data}, {local}, {assinatura}. */
   text: string
   dateFormat: DateFormat
-  /** Campo "Graduação". Ausente em modelos antigos, que passam a mostrar graduação e título. */
+  /** Campos "Graduação" e "Graduação anterior". Ausente em modelos antigos, que passam a mostrar graduação e título. */
   graduationDisplay?: GraduationDisplay
-  /** Campo "Graduação": pinta cada cor (Verde, Amarelo…) com a própria cor. Padrão: sim. */
+  /** Campos "Graduação" e "Graduação anterior": pintam cada cor (Verde, Amarelo…) com a própria cor. Padrão: sim. */
   colorizeGraduation?: boolean
   /** Imagem fixa do campo "Imagem". */
   imageId: string | null
@@ -110,11 +110,15 @@ export interface FontVariant {
 export interface Student {
   name: string
   graduation: string
+  /** Graduação de onde o aluno veio. Ausente: a anterior no sistema de graduação. */
+  previousGraduation?: string
 }
 
 export interface StudentGroup {
   id: string
   graduation: string
+  /** Graduação anterior escolhida para o grupo. Ausente: a anterior no sistema; vazia: nenhuma. */
+  previousGraduation?: string
   names: string[]
 }
 
@@ -124,6 +128,9 @@ export interface CertificateValues {
   graduation: string
   /** Título da graduação (ex.: "Mestre"); vazio quando não há. */
   graduationTitle: string
+  /** Graduação de onde o aluno veio e o título dela; vazios quando não há. */
+  previousGraduation: string
+  previousGraduationTitle: string
   /** Cores do sistema de graduação, usadas para pintar o nome da graduação. */
   graduationPalette: ColorWord[]
   date: string

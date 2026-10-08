@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import type { CertificateTemplate, CertificateValues } from '@/types'
 import { useLotStore } from '@/stores/lot'
-import { titleOf } from '@/lib/graduationSystems'
+import { studentValues } from '@/lib/values'
 import EventSummary from './EventSummary.vue'
 import CertificatePreview from '@/components/certificate/CertificatePreview.vue'
 
@@ -21,15 +21,7 @@ watch(students, (list) => {
 
 const previewValues = computed<CertificateValues>(() => {
   const student = students.value[current.value] ?? { name: '', graduation: '' }
-  return {
-    name: student.name,
-    graduation: student.graduation,
-    graduationTitle: titleOf(lot.system, student.graduation),
-    graduationPalette: lot.system?.colors ?? [],
-    date: batch.value.date,
-    location: batch.value.location,
-    signerName: batch.value.signerName,
-  }
+  return studentValues(student, lot.system, batch.value)
 })
 
 const plural = (count: number) => (count === 1 ? '1 aluno' : `${count} alunos`)

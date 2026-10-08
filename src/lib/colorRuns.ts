@@ -9,9 +9,13 @@ export interface TextRun {
   color: string
 }
 
-/** O campo "Graduação" pinta as cores com a própria cor, a não ser que a opção esteja desligada. */
+/** Os campos de graduação pintam as cores com a própria cor, a não ser que a opção esteja desligada. */
 export function colorizesGraduation(field: CertificateField): boolean {
-  return field.type === 'graduation' && field.colorizeGraduation !== false
+  return isGraduationField(field) && field.colorizeGraduation !== false
+}
+
+export function isGraduationField(field: CertificateField): boolean {
+  return field.type === 'graduation' || field.type === 'previous-graduation'
 }
 
 function isLetter(char: string | undefined): boolean {

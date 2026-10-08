@@ -203,6 +203,13 @@ export function titleOf(system: GraduationSystem | null | undefined, levelName: 
   return system?.levels.find((level) => level.name === levelName)?.title ?? ''
 }
 
+/** Graduação que vem antes na sequência do sistema. Vazia para a primeira ou uma que não está no sistema. */
+export function previousLevelOf(system: GraduationSystem | null | undefined, levelName: string): string {
+  const levels = system?.levels ?? []
+  const index = levels.findIndex((level) => level.name === levelName)
+  return index > 0 ? levels[index - 1].name : ''
+}
+
 /**
  * Lista antiga (versões anteriores guardavam só a lista da capoeira, às vezes só nomes).
  * Vira um sistema "Capoeira" com as cores e títulos do modelo pronto.
