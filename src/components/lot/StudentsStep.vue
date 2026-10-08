@@ -3,12 +3,13 @@ import { computed, ref } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import type { CertificateTemplate, StudentGroup as Group } from '@/types'
 import { useLotStore } from '@/stores/lot'
+import { usesPreviousGraduation } from '@/lib/fieldText'
 import { useUiStore } from '@/stores/ui'
 import EventSummary from './EventSummary.vue'
 import StudentGroup from '@/components/students/StudentGroup.vue'
 import StudentGroupForm from '@/components/students/StudentGroupForm.vue'
 
-defineProps<{ template: CertificateTemplate }>()
+const props = defineProps<{ template: CertificateTemplate }>()
 const emit = defineEmits<{ back: []; next: [] }>()
 
 const lot = useLotStore()
@@ -19,14 +20,15 @@ const usedGraduations = computed(() => groups.value.map((g) => g.graduation))
 const adding = ref(groups.value.length === 0)
 const editingId = ref<string | null>(null)
 const total = computed(() => lot.students.length)
+const showPrevious = computed(() => usesPreviousGraduation(props.template))
 
-function onAdd(graduation: string, names: string[]) {
-  lot.addGroup(graduation, names)
+function onAdd(graduation: string, names: string[], previous?: string) {
+  lot.addGroup(graduation, names, previous)
   adding.value = false
 }
 
-function onEdit(group: Group, graduation: string, names: string[]) {
-  lot.updateGroup(group.id, graduation, names)
+function onEdit(group: Group, graduation: string, names: string[], previous?: string) {
+  lot.updateGroup(group.id, graduation, names, previous)
   editingId.value = null
 }
 
@@ -62,14 +64,18 @@ function removeStudent(group: Group, index: number) {
           v-if="editingId === group.id"
           :initial-graduation="group.graduation"
           :initial-names="group.names"
+          :initial-previous="group.previousGraduation"
+          :show-previous="showPrevious"
+          :group-id="group.id"
           editing
           cancellable
-          @submit="(graduation, names) => onEdit(group, graduation, names)"
+          @submit="(graduation, names, previous) => onEdit(group, graduation, names, previous)"
           @cancel="editingId = null"
         />
         <StudentGroup
           v-else
           :group="group"
+          :show-previous="showPrevious"
           @edit="editingId = group.id"
           @remove="removeGroup(group)"
           @remove-student="(index) => removeStudent(group, index)"
@@ -79,6 +85,7 @@ function removeStudent(group: Group, index: number) {
       <StudentGroupForm
         v-if="adding"
         :used-graduations="usedGraduations"
+        :show-previous="showPrevious"
         :cancellable="groups.length > 0"
         @submit="onAdd"
         @cancel="adding = false"

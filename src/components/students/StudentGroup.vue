@@ -4,11 +4,15 @@ import { X } from 'lucide-vue-next'
 import type { StudentGroup } from '@/types'
 import { useLotStore } from '@/stores/lot'
 
-const props = defineProps<{ group: StudentGroup }>()
+const props = defineProps<{ group: StudentGroup; showPrevious?: boolean }>()
 const emit = defineEmits<{ edit: []; remove: []; removeStudent: [index: number] }>()
 const lot = useLotStore()
 
 const levelLabel = computed(() => lot.system?.levelLabel ?? 'Graduação')
+const previousLabel = computed(() => {
+  const previous = lot.previousOf(props.group)
+  return previous ? `Vindo de ${lot.labelOf(previous)}` : 'Sem graduação anterior'
+})
 const countLabel = computed(() => (props.group.names.length === 1 ? '1 aluno' : `${props.group.names.length} alunos`))
 </script>
 
@@ -17,7 +21,9 @@ const countLabel = computed(() => (props.group.names.length === 1 ? '1 aluno' : 
     <header class="group__header">
       <div>
         <h3 class="group__title">{{ levelLabel }}: {{ lot.labelOf(group.graduation) }}</h3>
-        <p class="muted small">{{ countLabel }}</p>
+        <p class="muted small">
+          {{ countLabel }}<template v-if="showPrevious">. {{ previousLabel }}</template>
+        </p>
       </div>
       <div class="group__actions">
         <button type="button" class="btn btn--ghost btn--sm" @click="emit('edit')">Editar</button>

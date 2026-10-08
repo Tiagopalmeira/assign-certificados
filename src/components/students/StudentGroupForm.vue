@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { CircleAlert } from 'lucide-vue-next'
 import { RouterLink } from 'vue-router'
 import { parseNames } from '@/lib/names'
+import { previousLevelOf } from '@/lib/graduationSystems'
 import { useLotStore } from '@/stores/lot'
 
 /** Formulário de um grupo: escolhe a graduação e cola os nomes dos alunos. */
@@ -10,15 +11,33 @@ const props = withDefaults(
   defineProps<{
     initialGraduation?: string
     initialNames?: string[]
+    /** Graduação anterior do grupo. Ausente: a que vem antes no sistema. */
+    initialPrevious?: string
+    /** Mostra a escolha da graduação anterior (quando o modelo usa). */
+    showPrevious?: boolean
     /** Graduações que já têm grupo (a primeira livre vem selecionada). */
     usedGraduations?: string[]
+    /** Grupo sendo editado, para não avisar que ele vai juntar com ele mesmo. */
+    groupId?: string
     editing?: boolean
     cancellable?: boolean
   }>(),
-  { initialGraduation: '', initialNames: () => [], usedGraduations: () => [], editing: false, cancellable: false },
+  {
+    initialGraduation: '',
+    initialNames: () => [],
+    initialPrevious: undefined,
+    showPrevious: false,
+    usedGraduations: () => [],
+    groupId: undefined,
+    editing: false,
+    cancellable: false,
+  },
 )
 
-const emit = defineEmits<{ submit: [graduation: string, names: string[]]; cancel: [] }>()
+const emit = defineEmits<{ submit: [graduation: string, names: string[], previous: string | undefined]; cancel: [] }>()
+
+/** Valor do select para "a anterior no sistema". */
+const AUTO = '__auto__'
 
 const lot = useLotStore()
 const levels = computed(() => lot.system?.levels ?? [])
@@ -30,6 +49,17 @@ const graduation = ref(
     levels.value[0]?.name ||
     '',
 )
+const previousChoice = ref(props.initialPrevious ?? AUTO)
+const previous = computed(() => (previousChoice.value === AUTO ? undefined : previousChoice.value))
+const autoPreviousLabel = computed(() => {
+  const name = previousLevelOf(lot.system, graduation.value)
+  return name ? `A anterior no sistema (${lot.labelOf(name)})` : 'A anterior no sistema (nenhuma)'
+})
+const previousOptions = computed(() => levels.value.filter((l) => l.name !== graduation.value))
+// A anterior não pode ser a própria graduação.
+watch(graduation, (name) => {
+  if (previousChoice.value === name) previousChoice.value = AUTO
+})
 const text = ref(props.initialNames.join('\n'))
 const error = ref('')
 
@@ -39,9 +69,9 @@ const countLabel = computed(() => {
   if (count === 0) return ''
   return count === 1 ? '1 nome encontrado' : `${count} nomes encontrados`
 })
-const mergeNotice = computed(
-  () => !props.editing && props.usedGraduations.includes(graduation.value)
-    ? `Já existe um grupo ${graduation.value}. Os nomes serão adicionados a ele.`
+const mergeNotice = computed(() =>
+  lot.findGroup(graduation.value, previous.value, props.groupId)
+    ? `Já existe um grupo ${graduation.value}${props.showPrevious ? ' com essa graduação anterior' : ''}. Os nomes serão adicionados a ele.`
     : '',
 )
 
@@ -55,7 +85,7 @@ function submit() {
     error.value = 'Digite pelo menos um nome.'
     return
   }
-  emit('submit', graduation.value, names.value)
+  emit('submit', graduation.value, names.value, previous.value)
   if (!props.editing) text.value = ''
 }
 </script>
@@ -71,6 +101,17 @@ function submit() {
       <select :id="`graduation-${uid}`" v-model="graduation" class="select">
         <option v-for="item in levels" :key="item.id" :value="item.name">{{ lot.labelOf(item.name) }}</option>
       </select>
+      <p v-if="mergeNotice && !showPrevious" class="form-help">{{ mergeNotice }}</p>
+    </div>
+
+    <div v-if="showPrevious" class="form-field graduation">
+      <label class="form-label" :for="`previous-${uid}`">{{ lot.system?.levelLabel ?? 'Graduação' }} anterior</label>
+      <select :id="`previous-${uid}`" v-model="previousChoice" class="select">
+        <option :value="AUTO">{{ autoPreviousLabel }}</option>
+        <option v-for="item in previousOptions" :key="item.id" :value="item.name">{{ lot.labelOf(item.name) }}</option>
+        <option value="">Nenhuma</option>
+      </select>
+      <p class="form-help">Troque quando os alunos deste grupo vieram de outra graduação.</p>
       <p v-if="mergeNotice" class="form-help">{{ mergeNotice }}</p>
     </div>
 

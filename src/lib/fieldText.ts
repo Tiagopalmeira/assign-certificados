@@ -1,4 +1,4 @@
-import type { CertificateField, CertificateValues } from '@/types'
+import type { CertificateField, CertificateTemplate, CertificateValues } from '@/types'
 import { formatDate } from './dates'
 import { graduationLabel } from './graduationSystems'
 
@@ -77,4 +77,13 @@ export function isMultiline(field: CertificateField): boolean {
 
 export function hasText(field: CertificateField): boolean {
   return field.type !== 'image'
+}
+
+/** O modelo mostra a graduação anterior (no campo próprio ou no texto)? */
+export function usesPreviousGraduation(template: Pick<CertificateTemplate, 'fields'>): boolean {
+  return template.fields.some(
+    (field) =>
+      field.type === 'previous-graduation' ||
+      (field.type === 'text' && /\{\s*gradua(c|ç)(a|ã)o_anterior\s*\}/i.test(field.text)),
+  )
 }

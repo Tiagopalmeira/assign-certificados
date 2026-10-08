@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import type { CertificateTemplate, CertificateValues } from '@/types'
 import { useLotStore } from '@/stores/lot'
 import { studentValues } from '@/lib/values'
+import { usesPreviousGraduation } from '@/lib/fieldText'
 import EventSummary from './EventSummary.vue'
 import CertificatePreview from '@/components/certificate/CertificatePreview.vue'
 
@@ -24,6 +25,8 @@ const previewValues = computed<CertificateValues>(() => {
   return studentValues(student, lot.system, batch.value)
 })
 
+const showPrevious = computed(() => usesPreviousGraduation(props.template))
+
 const plural = (count: number) => (count === 1 ? '1 aluno' : `${count} alunos`)
 </script>
 
@@ -39,8 +42,11 @@ const plural = (count: number) => (count === 1 ? '1 aluno' : `${count} alunos`)
             Total de certificados: <strong>{{ students.length }}</strong>
           </p>
           <ul class="counts">
-            <li v-for="item in lot.summary" :key="item.graduation">
-              <span>{{ lot.labelOf(item.graduation) }}</span>
+            <li v-for="item in lot.summary" :key="item.id">
+              <span>
+                {{ lot.labelOf(item.graduation) }}
+                <span v-if="showPrevious" class="muted small">(vindo de {{ item.previousGraduation ? lot.labelOf(item.previousGraduation) : 'nenhuma' }})</span>
+              </span>
               <span class="muted">{{ plural(item.count) }}</span>
             </li>
           </ul>

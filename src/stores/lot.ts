@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import type { CertificateBatch, CertificateTemplate, Student, StudentGroup } from '@/types'
 import { createId } from '@/lib/ids'
 import { todayIso } from '@/lib/dates'
-import { graduationLabel, titleOf } from '@/lib/graduationSystems'
+import { graduationLabel, previousLevelOf, titleOf } from '@/lib/graduationSystems'
 import { useFilesStore } from './files'
 import { useGraduationSystemsStore } from './graduationSystems'
 
@@ -104,6 +104,18 @@ export const useLotStore = defineStore('lot', () => {
     return graduationLabel(graduation, titleOf(system.value, graduation))
   }
 
+  /** Graduação anterior de um grupo: a escolhida nele ou a que vem antes no sistema. */
+  function previousOf(group: Pick<StudentGroup, 'graduation' | 'previousGraduation'>): string {
+    return group.previousGraduation ?? previousLevelOf(system.value, group.graduation)
+  }
+
+  /** Grupos com a mesma graduação e a mesma graduação anterior viram um só. */
+  function findGroup(graduation: string, previousGraduation: string | undefined, exceptId?: string) {
+    return draft.value?.groups.find(
+      (g) => g.id !== exceptId && g.graduation === graduation && g.previousGraduation === previousGraduation,
+    )
+  }
+
   async function discardNewSignature() {
     const id = draft.value?.newSignatureId
     if (!id) return
@@ -118,24 +130,26 @@ export const useLotStore = defineStore('lot', () => {
     draft.value.useTemplateSignature = false
   }
 
-  function addGroup(graduation: string, names: string[]) {
+  /** previousGraduation ausente: a anterior no sistema; vazia: nenhuma. */
+  function addGroup(graduation: string, names: string[], previousGraduation?: string) {
     if (!draft.value || names.length === 0) return
-    const existing = draft.value.groups.find((group) => group.graduation === graduation)
+    const existing = findGroup(graduation, previousGraduation)
     if (existing) existing.names.push(...names)
-    else draft.value.groups.push({ id: createId(), graduation, names: [...names] })
+    else draft.value.groups.push({ id: createId(), graduation, previousGraduation, names: [...names] })
   }
 
-  function updateGroup(groupId: string, graduation: string, names: string[]) {
+  function updateGroup(groupId: string, graduation: string, names: string[], previousGraduation?: string) {
     if (!draft.value) return
     const group = draft.value.groups.find((g) => g.id === groupId)
     if (!group) return
     if (names.length === 0) return removeGroup(groupId)
-    const sameGraduation = draft.value.groups.find((g) => g.id !== groupId && g.graduation === graduation)
-    if (sameGraduation) {
-      sameGraduation.names.push(...names)
+    const same = findGroup(graduation, previousGraduation, groupId)
+    if (same) {
+      same.names.push(...names)
       removeGroup(groupId)
     } else {
       group.graduation = graduation
+      group.previousGraduation = previousGraduation
       group.names = [...names]
     }
   }
@@ -154,12 +168,17 @@ export const useLotStore = defineStore('lot', () => {
 
   const students = computed<Student[]>(() =>
     (draft.value?.groups ?? []).flatMap((group) =>
-      group.names.map((name) => ({ name, graduation: group.graduation })),
+      group.names.map((name) => ({ name, graduation: group.graduation, previousGraduation: group.previousGraduation })),
     ),
   )
 
   const summary = computed(() =>
-    (draft.value?.groups ?? []).map((group) => ({ graduation: group.graduation, count: group.names.length })),
+    (draft.value?.groups ?? []).map((group) => ({
+      id: group.id,
+      graduation: group.graduation,
+      previousGraduation: previousOf(group),
+      count: group.names.length,
+    })),
   )
 
   function effectiveDate(template: CertificateTemplate) {
@@ -189,6 +208,8 @@ export const useLotStore = defineStore('lot', () => {
     system,
     setSystem,
     labelOf,
+    previousOf,
+    findGroup,
     students,
     summary,
     start,
