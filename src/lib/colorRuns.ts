@@ -31,6 +31,38 @@ function paletteMatcher(palette: readonly ColorWord[]): { regex: RegExp; colors:
   return { regex: new RegExp(`(${alternatives.join('|')})`, 'giu'), colors }
 }
 
+export interface ColorSegment {
+  text: string
+  /** Cor da palavra da paleta, ou null para o texto comum. */
+  color: string | null
+}
+
+/** Divide um texto em trechos: palavras da paleta (com a cor delas) e o resto (sem cor). */
+export function paletteSegments(text: string, palette: readonly ColorWord[]): ColorSegment[] {
+  const matcher = paletteMatcher(palette)
+  if (!matcher) return [{ text, color: null }]
+  const segments: ColorSegment[] = []
+  let cursor = 0
+  for (const match of text.matchAll(matcher.regex)) {
+    const start = match.index ?? 0
+    const end = start + match[0].length
+    // Só palavras inteiras: "Azulejo" não conta.
+    if (isLetter(text[start - 1]) || isLetter(text[end])) continue
+    const color = matcher.colors.get(match[0].toLocaleLowerCase('pt-BR'))
+    if (!color) continue
+    if (start > cursor) segments.push({ text: text.slice(cursor, start), color: null })
+    segments.push({ text: match[0], color })
+    cursor = end
+  }
+  if (cursor < text.length) segments.push({ text: text.slice(cursor), color: null })
+  return segments
+}
+
+/** Cores (sem repetir) das palavras da paleta que aparecem no texto. */
+export function colorsIn(text: string, palette: readonly ColorWord[]): string[] {
+  return [...new Set(paletteSegments(text, palette).flatMap((s) => (s.color ? [s.color] : [])))]
+}
+
 /**
  * Divide uma linha em trechos com cor própria. As palavras da paleta do sistema de graduação
  * ("Verde", "Roxa", "Marrom"…) usam a cor correspondente; o resto usa a cor do campo. A posição
@@ -45,30 +77,12 @@ export function colorRuns(
   palette: readonly ColorWord[],
 ): TextRun[] {
   const base = field.style.color
-  const plain = [{ text: line, offset: 0, color: base }]
-  const matcher = colorizesGraduation(field) ? paletteMatcher(palette) : null
-  if (!matcher) return plain
-
-  const pieces: { text: string; color: string }[] = []
-  let cursor = 0
-  for (const match of line.matchAll(matcher.regex)) {
-    const start = match.index ?? 0
-    const end = start + match[0].length
-    // Só palavras inteiras: "Azulejo" não conta.
-    if (isLetter(line[start - 1]) || isLetter(line[end])) continue
-    const color = matcher.colors.get(match[0].toLocaleLowerCase('pt-BR'))
-    if (!color) continue
-    if (start > cursor) pieces.push({ text: line.slice(cursor, start), color: base })
-    pieces.push({ text: match[0], color })
-    cursor = end
-  }
-  if (pieces.length === 0) return plain
-  if (cursor < line.length) pieces.push({ text: line.slice(cursor), color: base })
+  if (!colorizesGraduation(field)) return [{ text: line, offset: 0, color: base }]
 
   let consumed = ''
-  return pieces.map((piece) => {
+  return paletteSegments(line, palette).map((segment) => {
     const offset = consumed ? metrics.measure(consumed, fontSize) + letterSpacing * [...consumed].length : 0
-    consumed += piece.text
-    return { ...piece, offset }
+    consumed += segment.text
+    return { text: segment.text, offset, color: segment.color ?? base }
   })
 }

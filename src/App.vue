@@ -33,6 +33,7 @@ onMounted(async () => {
       </RouterLink>
       <nav class="nav" aria-label="Principal">
         <RouterLink to="/modelos" class="nav__link" active-class="nav__link--active">Meus modelos</RouterLink>
+        <RouterLink to="/graduacoes" class="nav__link" active-class="nav__link--active">Graduações</RouterLink>
         <RouterLink to="/fontes" class="nav__link" active-class="nav__link--active">Fontes</RouterLink>
       </nav>
     </div>

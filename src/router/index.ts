@@ -25,6 +25,19 @@ export const router = createRouter({
       meta: { title: 'Novo lote' },
     },
     {
+      path: '/graduacoes',
+      name: 'graduation-systems',
+      component: () => import('@/views/GraduationSystemsView.vue'),
+      meta: { title: 'Graduações' },
+    },
+    {
+      path: '/graduacoes/:id',
+      name: 'graduation-system-editor',
+      component: () => import('@/views/GraduationSystemEditView.vue'),
+      props: true,
+      meta: { title: 'Editar sistema de graduação' },
+    },
+    {
       path: '/fontes',
       name: 'fonts',
       component: () => import('@/views/FontsView.vue'),
