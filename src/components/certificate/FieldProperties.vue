@@ -5,6 +5,7 @@ import { AlignCenter, AlignLeft, AlignRight, BringToFront, Copy, SendToBack, Tra
 import type { CertificateField, GraduationDisplay, TextAlign, TextStyle } from '@/types'
 import { fieldLabel } from '@/lib/fields'
 import { hasText, PLACEHOLDER_HELP } from '@/lib/fieldText'
+import { isGraduationField } from '@/lib/colorRuns'
 import { isValidHex } from '@/lib/color'
 import { round } from '@/lib/geometry'
 import { useTemplateEditor } from '@/composables/useTemplateEditor'
@@ -133,8 +134,11 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
       <h3 class="group__title">Conteúdo</h3>
 
       <p v-if="field.type === 'name'" class="form-help">O nome de cada aluno é colocado aqui.</p>
-      <template v-if="field.type === 'graduation'">
-        <p class="form-help">A graduação escolhida no lote é colocada aqui.</p>
+      <template v-if="isGraduationField(field)">
+        <p v-if="field.type === 'graduation'" class="form-help">A graduação escolhida no lote é colocada aqui.</p>
+        <p v-else class="form-help">
+          A graduação de onde o aluno veio: a que vem antes no sistema de graduação. Pode ser trocada em cada grupo do lote.
+        </p>
         <div class="form-field">
           <label class="form-label" :for="id('graduation-display')">Mostrar</label>
           <select
@@ -259,7 +263,7 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
         />
       </template>
 
-      <div v-if="['name', 'graduation', 'date', 'location'].includes(field.type)" class="row">
+      <div v-if="['name', 'graduation', 'previous-graduation', 'date', 'location'].includes(field.type)" class="row">
         <div class="form-field">
           <label class="form-label" :for="id('prefix')">Texto antes (opcional)</label>
           <input :id="id('prefix')" class="input input--sm" type="text" :value="field.prefix" @input="setText('prefix', $event)" @change="editor.commit()" />
