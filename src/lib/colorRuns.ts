@@ -9,19 +9,11 @@ export const GRADUATION_COLORS: Readonly<Record<string, string>> = {
   branco: '#FFFFFF',
 }
 
-/** Cores claras demais para ler sobre papel claro: ganham um contorno fino. */
-const LIGHT_COLORS = new Set(['amarelo', 'branco'])
-
-/** Espessura do contorno em relação ao tamanho da fonte (metade fica visível por fora). */
-export const OUTLINE_WIDTH = 0.05
-
 export interface TextRun {
   text: string
   /** Distância do início da linha até o início do trecho. */
   offset: number
   color: string
-  /** Cor do contorno, quando o trecho tem um. */
-  outline: string | null
 }
 
 const COLOR_WORD = /(verde|amarelo|azul|branco)/giu
@@ -48,10 +40,10 @@ export function colorRuns(
   metrics: FontMetrics,
 ): TextRun[] {
   const base = field.style.color
-  const plain = [{ text: line, offset: 0, color: base, outline: null }]
+  const plain = [{ text: line, offset: 0, color: base }]
   if (!colorizesGraduation(field)) return plain
 
-  const pieces: { text: string; color: string; outline: string | null }[] = []
+  const pieces: { text: string; color: string }[] = []
   let cursor = 0
   for (const match of line.matchAll(COLOR_WORD)) {
     const start = match.index ?? 0
@@ -59,12 +51,12 @@ export function colorRuns(
     // Só palavras inteiras: "Azulejo" não conta.
     if (isLetter(line[start - 1]) || isLetter(line[end])) continue
     const key = match[0].toLowerCase()
-    if (start > cursor) pieces.push({ text: line.slice(cursor, start), color: base, outline: null })
-    pieces.push({ text: match[0], color: GRADUATION_COLORS[key], outline: LIGHT_COLORS.has(key) ? base : null })
+    if (start > cursor) pieces.push({ text: line.slice(cursor, start), color: base })
+    pieces.push({ text: match[0], color: GRADUATION_COLORS[key] })
     cursor = end
   }
   if (pieces.length === 0) return plain
-  if (cursor < line.length) pieces.push({ text: line.slice(cursor), color: base, outline: null })
+  if (cursor < line.length) pieces.push({ text: line.slice(cursor), color: base })
 
   let consumed = ''
   return pieces.map((piece) => {

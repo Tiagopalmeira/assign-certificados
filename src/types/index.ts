@@ -118,7 +118,7 @@ export interface StudentGroup {
 export interface CertificateValues {
   name: string
   graduation: string
-  /** Título da graduação (ex.: "Instrutor"); vazio quando não há. */
+  /** Título da graduação (ex.: "Mestre"); vazio quando não há. */
   graduationTitle: string
   date: string
   location: string

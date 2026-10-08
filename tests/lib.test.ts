@@ -133,7 +133,7 @@ describe('graduações', () => {
     ])
     const titles = Object.fromEntries(DEFAULT_GRADUATIONS.filter((g) => g.title).map((g) => [g.name, g.title]))
     expect(titles).toEqual({
-      'Verde e Amarelo': 'Instrutor',
+      'Azul e Amarelo': 'Estagiário',
       'Verde, Amarelo e Azul': 'Formado',
       'Branco e Verde': 'Monitor',
       'Branco e Amarelo': 'Professor',
@@ -178,19 +178,20 @@ describe('colorRuns', () => {
   const field = { ...createField('graduation', 842, 595), style: { ...createField('graduation', 842, 595).style, color: '#000000' } }
 
   it('pinta cada cor com a própria cor e mantém o resto na cor do campo', () => {
-    const runs = colorRuns(field, 'Graduação: Verde e Amarelo - Instrutor', 10, 0, mono)
+    const runs = colorRuns(field, 'Graduação: Verde e Amarelo', 10, 0, mono)
     expect(runs.map((r) => [r.text, r.color])).toEqual([
       ['Graduação: ', '#000000'],
       ['Verde', GRADUATION_COLORS.verde],
       [' e ', '#000000'],
       ['Amarelo', GRADUATION_COLORS.amarelo],
-      [' - Instrutor', '#000000'],
     ])
   })
-  it('cores claras ganham contorno na cor do campo', () => {
-    const runs = colorRuns(field, 'Branco e Azul', 10, 0, mono)
-    expect(runs.find((r) => r.text === 'Branco')?.outline).toBe('#000000')
-    expect(runs.find((r) => r.text === 'Azul')?.outline).toBeNull()
+  it('o título fica na cor do campo', () => {
+    const runs = colorRuns(field, 'Branco - Mestre', 10, 0, mono)
+    expect(runs.map((r) => [r.text, r.color])).toEqual([
+      ['Branco', GRADUATION_COLORS.branco],
+      [' - Mestre', '#000000'],
+    ])
   })
   it('calcula a posição de cada trecho com as métricas e o espaçamento', () => {
     const runs = colorRuns(field, 'Verde e Azul', 10, 1, mono)

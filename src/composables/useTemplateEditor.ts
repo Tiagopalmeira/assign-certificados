@@ -154,7 +154,9 @@ export function createTemplateEditor(original: CertificateTemplate) {
 
 export type TemplateEditor = ReturnType<typeof createTemplateEditor>
 
-const EDITOR_KEY: InjectionKey<TemplateEditor> = Symbol('template-editor')
+// Symbol.for devolve sempre o mesmo símbolo, mesmo se este módulo for recarregado pelo
+// servidor de desenvolvimento; com Symbol() comum, o editor e os painéis perdiam a ligação.
+const EDITOR_KEY: InjectionKey<TemplateEditor> = Symbol.for('cert-assign:template-editor')
 
 export function provideTemplateEditor(editor: TemplateEditor) {
   provide(EDITOR_KEY, editor)

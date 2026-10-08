@@ -105,7 +105,7 @@ A lista inicial fica em `src/lib/graduations.ts`. Algumas graduações conferem 
 
 | Graduação | Título |
 |---|---|
-| Verde e Amarelo | Instrutor |
+| Azul e Amarelo | Estagiário |
 | Verde, Amarelo e Azul | Formado |
 | Branco e Verde | Monitor |
 | Branco e Amarelo | Professor |
@@ -113,11 +113,10 @@ A lista inicial fica em `src/lib/graduations.ts`. Algumas graduações conferem 
 | Branco | Mestre |
 
 No editor, o campo **Graduação** tem a opção *Mostrar*: graduação e título
-("Verde e Amarelo - Instrutor", o padrão), só a graduação ou só o título. Graduações sem
+("Branco e Azul - Contramestre", o padrão), só a graduação ou só o título. Graduações sem
 título mostram só a graduação. No campo **Texto**, use `{titulo}`.
 
-Cada cor no nome da graduação sai na própria cor (verde, amarelo, azul, branco). Amarelo
-e branco ganham um contorno fino na cor do campo para ficarem legíveis em papel claro. Dá
+Cada cor no nome da graduação sai na própria cor (verde, amarelo, azul, branco). Dá
 para desligar isso no campo **Graduação** ("Pintar cada cor com a própria cor"). As cores
 ficam em `src/lib/colorRuns.ts`.
 

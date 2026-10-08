@@ -5,7 +5,7 @@ import { resolveFieldText, isMultiline } from '@/lib/fieldText'
 import { layoutText } from '@/lib/textLayout'
 import { signatureBoxes, type Box } from '@/lib/geometry'
 import { FAUX_BOLD_STROKE } from '@/lib/fonts'
-import { OUTLINE_WIDTH, colorRuns } from '@/lib/colorRuns'
+import { colorRuns } from '@/lib/colorRuns'
 import { fieldLabel } from '@/lib/fields'
 import { useFontsStore } from '@/stores/fonts'
 import { useFilesStore } from '@/stores/files'
@@ -83,11 +83,9 @@ const runs = computed(() => {
     )
 })
 
-function strokeOf(run: { color: string; outline: string | null }) {
+/** Negrito simulado (quando a fonte não tem negrito): traço da mesma cor do texto. */
+function strokeOf(run: { color: string }) {
   if (!layout.value) return {}
-  if (run.outline) {
-    return { stroke: run.outline, 'stroke-width': layout.value.fontSize * OUTLINE_WIDTH, 'paint-order': 'stroke', 'stroke-linejoin': 'round' as const }
-  }
   if (font.value.fauxBold) return { stroke: run.color, 'stroke-width': layout.value.fontSize * FAUX_BOLD_STROKE }
   return {}
 }

@@ -143,9 +143,9 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
             :value="field.graduationDisplay ?? 'graduation-title'"
             @change="editor.updateField(field.id, { graduationDisplay: ($event.target as HTMLSelectElement).value as GraduationDisplay }); editor.commit()"
           >
-            <option value="graduation-title">Graduação e título (Verde e Amarelo - Instrutor)</option>
-            <option value="graduation">Só a graduação (Verde e Amarelo)</option>
-            <option value="title">Só o título (Instrutor)</option>
+            <option value="graduation-title">Graduação e título (Branco e Azul - Contramestre)</option>
+            <option value="graduation">Só a graduação (Branco e Azul)</option>
+            <option value="title">Só o título (Contramestre)</option>
           </select>
           <span class="form-help">Graduações sem título mostram só a graduação.</span>
         </div>

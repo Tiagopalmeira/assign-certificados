@@ -1,6 +1,6 @@
 export interface Graduation {
   name: string
-  /** Título que a graduação confere (ex.: "Instrutor"). Vazio quando não há. */
+  /** Título que a graduação confere (ex.: "Mestre"). Vazio quando não há. */
   title: string
 }
 
@@ -10,9 +10,9 @@ export const DEFAULT_GRADUATIONS: readonly Graduation[] = [
   { name: 'Verde', title: '' },
   { name: 'Amarelo', title: '' },
   { name: 'Azul', title: '' },
-  { name: 'Verde e Amarelo', title: 'Instrutor' },
+  { name: 'Verde e Amarelo', title: '' },
   { name: 'Verde e Azul', title: '' },
-  { name: 'Azul e Amarelo', title: '' },
+  { name: 'Azul e Amarelo', title: 'Estagiário' },
   { name: 'Verde, Amarelo e Azul', title: 'Formado' },
   { name: 'Branco e Verde', title: 'Monitor' },
   { name: 'Branco e Amarelo', title: 'Professor' },
@@ -20,7 +20,7 @@ export const DEFAULT_GRADUATIONS: readonly Graduation[] = [
   { name: 'Branco', title: 'Mestre' },
 ]
 
-/** Texto da graduação com o título, quando houver: "Verde e Amarelo - Instrutor". */
+/** Texto da graduação com o título, quando houver: "Branco e Azul - Contramestre". */
 export function graduationLabel(name: string, title: string): string {
   return title ? `${name} - ${title}` : name
 }

@@ -27,8 +27,8 @@ export function fieldLabel(type: FieldType): string {
 export function sampleValues(defaults: TemplateDefaults): CertificateValues {
   return {
     name: 'Maria Oliveira Santos',
-    graduation: 'Verde e Amarelo',
-    graduationTitle: 'Instrutor',
+    graduation: 'Branco e Azul',
+    graduationTitle: 'Contramestre',
     date: defaults.date,
     location: defaults.location,
     signerName: defaults.signerName,

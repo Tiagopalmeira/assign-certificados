@@ -33,7 +33,7 @@ import { resolveFieldText, isMultiline } from './fieldText'
 import { FAUX_BOLD_STROKE, FAUX_ITALIC_SKEW, loadFontBytes, loadFontkitFont, metricsFromFont, resolveFont } from './fonts'
 import { fontkit } from './fontkit'
 import { containRect, layoutText } from './textLayout'
-import { OUTLINE_WIDTH, colorRuns } from './colorRuns'
+import { colorRuns } from './colorRuns'
 import { signatureBoxes, type Box } from './geometry'
 import { sanitizeFileName, uniqueFileNames } from './filename'
 
@@ -200,8 +200,6 @@ async function drawTextBox(
     const y = box.y + line.baseline
     for (const run of colorRuns(field, line.text, layout.fontSize, layout.letterSpacing, metrics)) {
       const x = box.x + line.x + run.offset
-      // Contorno primeiro, preenchimento por cima: só a metade de fora do traço aparece.
-      if (run.outline) drawRun(run.text, x, y, run.outline, TextRenderingMode.Outline, layout.fontSize * OUTLINE_WIDTH)
       const mode = resolved.fauxBold ? TextRenderingMode.FillAndOutline : TextRenderingMode.Fill
       drawRun(run.text, x, y, run.color, mode, layout.fontSize * FAUX_BOLD_STROKE)
     }
