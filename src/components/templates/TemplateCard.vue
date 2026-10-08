@@ -4,12 +4,14 @@ import { RouterLink } from 'vue-router'
 import type { CertificateTemplate } from '@/types'
 import { formatDateTime } from '@/lib/dates'
 import { sampleValues } from '@/lib/fields'
+import { useGraduationSystemsStore } from '@/stores/graduationSystems'
 import CertificatePreview from '@/components/certificate/CertificatePreview.vue'
 
 const props = defineProps<{ template: CertificateTemplate }>()
 const emit = defineEmits<{ duplicate: []; remove: [] }>()
 
-const values = computed(() => sampleValues(props.template.defaults))
+const systems = useGraduationSystemsStore()
+const values = computed(() => sampleValues(props.template.defaults, systems.fallback))
 const created = computed(() => formatDateTime(props.template.createdAt))
 const updated = computed(() => formatDateTime(props.template.updatedAt))
 </script>

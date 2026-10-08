@@ -7,7 +7,6 @@ import { useTemplatesStore } from '@/stores/templates'
 import { useFontsStore } from '@/stores/fonts'
 import { useFilesStore } from '@/stores/files'
 import { useLotStore } from '@/stores/lot'
-import { useGraduationsStore } from '@/stores/graduations'
 import { errorMessage, useUiStore } from '@/stores/ui'
 import EventDataStep from '@/components/lot/EventDataStep.vue'
 import StudentsStep from '@/components/lot/StudentsStep.vue'
@@ -21,7 +20,6 @@ const templates = useTemplatesStore()
 const fonts = useFontsStore()
 const files = useFilesStore()
 const lot = useLotStore()
-const graduations = useGraduationsStore()
 const ui = useUiStore()
 
 const template = computed(() => templates.byId(props.id))
@@ -57,7 +55,7 @@ function generationInput(): GenerationInput {
     signerName: batch.signerName,
     signatureId: batch.signatureId,
     students: batch.students,
-    graduationTitles: graduations.titles,
+    graduationSystem: lot.system,
     fonts: fonts.variants,
     loadFile: (id) => files.getBlob(id),
   }

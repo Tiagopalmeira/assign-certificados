@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useTemplatesStore } from '@/stores/templates'
 import { useFontsStore } from '@/stores/fonts'
-import { useGraduationsStore } from '@/stores/graduations'
+import { useGraduationSystemsStore } from '@/stores/graduationSystems'
 import ToastHost from '@/components/ui/ToastHost.vue'
 import ConfirmHost from '@/components/ui/ConfirmHost.vue'
 
@@ -13,7 +13,7 @@ const loadError = ref('')
 
 onMounted(async () => {
   try {
-    await Promise.all([useTemplatesStore().init(), useFontsStore().init(), useGraduationsStore().init()])
+    await Promise.all([useTemplatesStore().init(), useFontsStore().init(), useGraduationSystemsStore().init()])
   } catch (error) {
     console.error(error)
     loadError.value =

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { Student } from '@/types'
 import BaseModal from '@/components/ui/BaseModal.vue'
-import { useGraduationsStore } from '@/stores/graduations'
+import { useLotStore } from '@/stores/lot'
 
 const props = defineProps<{
   open: boolean
@@ -11,7 +11,7 @@ const props = defineProps<{
   progress: number | null
 }>()
 const emit = defineEmits<{ cancel: []; confirm: [] }>()
-const graduations = useGraduationsStore()
+const lot = useLotStore()
 
 const generating = computed(() => props.progress !== null)
 const totalLabel = computed(() => (props.students.length === 1 ? '1 certificado' : `${props.students.length} certificados`))
@@ -55,7 +55,7 @@ const percent = computed(() =>
           <tbody>
             <tr v-for="(student, index) in students" :key="index">
               <td>{{ student.name }}</td>
-              <td>{{ graduations.labelOf(student.graduation) }}</td>
+              <td>{{ lot.labelOf(student.graduation) }}</td>
             </tr>
           </tbody>
         </table>

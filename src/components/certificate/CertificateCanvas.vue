@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Maximize, Minus, Plus } from 'lucide-vue-next'
 import { sampleValues } from '@/lib/fields'
+import { useGraduationSystemsStore } from '@/stores/graduationSystems'
 import { useTemplateEditor } from '@/composables/useTemplateEditor'
 import CertificatePreview from './CertificatePreview.vue'
 import CertificateField from './CertificateField.vue'
@@ -16,7 +17,8 @@ const manualScale = ref<number | null>(null)
 const scale = computed(() => manualScale.value ?? fitScale.value)
 const zoomLabel = computed(() => `${Math.round((scale.value / fitScale.value) * 100)}%`)
 
-const values = computed(() => sampleValues(template.value.defaults))
+const systems = useGraduationSystemsStore()
+const values = computed(() => sampleValues(template.value.defaults, systems.fallback))
 
 const PADDING = 48
 

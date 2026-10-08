@@ -70,7 +70,7 @@ const runs = computed(() => {
   return layout.value.lines
     .filter((line) => line.text)
     .flatMap((line) =>
-      colorRuns(props.field, line.text, fontSize, letterSpacing, metrics).map((run) => {
+      colorRuns(props.field, line.text, fontSize, letterSpacing, metrics, props.values.graduationPalette ?? []).map((run) => {
         const x = box.x + line.x + run.offset
         const y = box.y + line.baseline
         return {

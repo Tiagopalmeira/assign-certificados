@@ -3,12 +3,16 @@ import { computed, ref, watch } from 'vue'
 import type { CertificateBatch, CertificateTemplate, Student, StudentGroup } from '@/types'
 import { createId } from '@/lib/ids'
 import { todayIso } from '@/lib/dates'
+import { graduationLabel, titleOf } from '@/lib/graduationSystems'
 import { useFilesStore } from './files'
+import { useGraduationSystemsStore } from './graduationSystems'
 
 const STORAGE_KEY = 'cert-assign:lot-draft'
 
 export interface LotDraft {
   templateId: string
+  /** Sistema de graduação dos alunos deste lote. */
+  systemId: string | null
   dateMode: 'template' | 'custom'
   customDate: string
   location: string
@@ -19,9 +23,10 @@ export interface LotDraft {
   groups: StudentGroup[]
 }
 
-function emptyDraft(template: CertificateTemplate): LotDraft {
+function emptyDraft(template: CertificateTemplate, systemId: string | null): LotDraft {
   return {
     templateId: template.id,
+    systemId,
     dateMode: 'template',
     customDate: template.defaults.date || todayIso(),
     location: template.defaults.location,
@@ -47,6 +52,14 @@ function readStoredDraft(): LotDraft | null {
  */
 export const useLotStore = defineStore('lot', () => {
   const draft = ref<LotDraft | null>(readStoredDraft())
+  const systems = useGraduationSystemsStore()
+
+  /** Sistema de graduação do lote (ou o padrão, se o escolhido foi excluído). */
+  const system = computed(() => systems.resolve(draft.value?.systemId))
+
+  function defaultSystemId(): string | null {
+    return systems.fallback?.id ?? null
+  }
 
   watch(
     draft,
@@ -65,15 +78,29 @@ export const useLotStore = defineStore('lot', () => {
   function start(template: CertificateTemplate) {
     if (draft.value?.templateId === template.id) {
       if (!template.defaults.signatureImageId) draft.value.useTemplateSignature = false
+      // Rascunhos de versões anteriores não tinham sistema.
+      if (!systems.byId(draft.value.systemId)) draft.value.systemId = system.value?.id ?? defaultSystemId()
       return
     }
     void discardNewSignature()
-    draft.value = emptyDraft(template)
+    draft.value = emptyDraft(template, defaultSystemId())
   }
 
   async function reset(template: CertificateTemplate) {
     await discardNewSignature()
-    draft.value = emptyDraft(template)
+    draft.value = emptyDraft(template, draft.value?.systemId ?? defaultSystemId())
+  }
+
+  /** Troca o sistema de graduação. Os grupos de alunos são do sistema anterior e saem. */
+  function setSystem(systemId: string) {
+    if (!draft.value || draft.value.systemId === systemId) return
+    draft.value.systemId = systemId
+    draft.value.groups = []
+  }
+
+  /** Graduação com o título do sistema do lote: "Branco - Mestre". */
+  function labelOf(graduation: string): string {
+    return graduationLabel(graduation, titleOf(system.value, graduation))
   }
 
   async function discardNewSignature() {
@@ -158,6 +185,9 @@ export const useLotStore = defineStore('lot', () => {
 
   return {
     draft,
+    system,
+    setSystem,
+    labelOf,
     students,
     summary,
     start,

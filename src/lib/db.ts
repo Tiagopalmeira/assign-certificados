@@ -1,27 +1,32 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { CertificateTemplate, FontVariant, StoredFile } from '@/types'
+import type { GraduationSystem } from './graduationSystems'
 import { createId } from './ids'
 
 /**
  * Persistência local no navegador (IndexedDB). Modelos, arquivos (fundos, imagens,
- * assinaturas), fontes enviadas e configurações ficam salvos neste aparelho.
+ * assinaturas), fontes enviadas, sistemas de graduação e configurações ficam salvos neste aparelho.
  */
 interface CertDB extends DBSchema {
   templates: { key: string; value: CertificateTemplate }
   files: { key: string; value: StoredFile }
   fonts: { key: string; value: FontVariant }
   settings: { key: string; value: unknown }
+  graduationSystems: { key: string; value: GraduationSystem }
 }
 
 let dbPromise: Promise<IDBPDatabase<CertDB>> | null = null
 
 function db() {
-  dbPromise ??= openDB<CertDB>('cert-assign', 1, {
-    upgrade(database) {
-      database.createObjectStore('templates', { keyPath: 'id' })
-      database.createObjectStore('files', { keyPath: 'id' })
-      database.createObjectStore('fonts', { keyPath: 'id' })
-      database.createObjectStore('settings')
+  dbPromise ??= openDB<CertDB>('cert-assign', 2, {
+    upgrade(database, oldVersion) {
+      if (oldVersion < 1) {
+        database.createObjectStore('templates', { keyPath: 'id' })
+        database.createObjectStore('files', { keyPath: 'id' })
+        database.createObjectStore('fonts', { keyPath: 'id' })
+        database.createObjectStore('settings')
+      }
+      if (oldVersion < 2) database.createObjectStore('graduationSystems', { keyPath: 'id' })
     },
   })
   return dbPromise
@@ -74,6 +79,18 @@ export const fontsRepo = {
   },
   async remove(id: string) {
     await (await db()).delete('fonts', id)
+  },
+}
+
+export const graduationSystemsRepo = {
+  async list() {
+    return (await db()).getAll('graduationSystems')
+  },
+  async put(system: GraduationSystem) {
+    await (await db()).put('graduationSystems', plain(system))
+  },
+  async remove(id: string) {
+    await (await db()).delete('graduationSystems', id)
   },
 }
 

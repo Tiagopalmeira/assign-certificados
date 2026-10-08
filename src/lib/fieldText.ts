@@ -1,6 +1,6 @@
 import type { CertificateField, CertificateValues } from '@/types'
 import { formatDate } from './dates'
-import { graduationLabel } from './graduations'
+import { graduationLabel } from './graduationSystems'
 
 const PLACEHOLDERS: Record<string, (values: CertificateValues, field: CertificateField) => string> = {
   nome: (v) => v.name,

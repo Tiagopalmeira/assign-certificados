@@ -34,6 +34,7 @@ import { FAUX_BOLD_STROKE, FAUX_ITALIC_SKEW, loadFontBytes, loadFontkitFont, met
 import { fontkit } from './fontkit'
 import { containRect, layoutText } from './textLayout'
 import { colorRuns } from './colorRuns'
+import { titleOf, type ColorWord, type GraduationSystem } from './graduationSystems'
 import { signatureBoxes, type Box } from './geometry'
 import { sanitizeFileName, uniqueFileNames } from './filename'
 
@@ -45,8 +46,8 @@ export interface GenerationInput {
   /** Imagem de assinatura do lote (null = sem imagem). */
   signatureId: string | null
   students: Student[]
-  /** Título de cada graduação (ex.: { 'Branco': 'Mestre' }). */
-  graduationTitles?: Record<string, string>
+  /** Sistema de graduação do lote: títulos e cores das graduações. */
+  graduationSystem?: GraduationSystem | null
   fonts: readonly FontVariant[]
   loadFile: (id: string) => Promise<Blob | undefined>
 }
@@ -155,6 +156,7 @@ async function drawTextBox(
   text: string,
   box: Box,
   fonts: readonly FontVariant[],
+  palette: readonly ColorWord[],
 ) {
   if (!text.trim() || box.height <= 0) return
   const { style } = field
@@ -198,7 +200,7 @@ async function drawTextBox(
   for (const line of layout.lines) {
     if (!line.text) continue
     const y = box.y + line.baseline
-    for (const run of colorRuns(field, line.text, layout.fontSize, layout.letterSpacing, metrics)) {
+    for (const run of colorRuns(field, line.text, layout.fontSize, layout.letterSpacing, metrics, palette)) {
       const x = box.x + line.x + run.offset
       const mode = resolved.fauxBold ? TextRenderingMode.FillAndOutline : TextRenderingMode.Fill
       drawRun(run.text, x, y, run.color, mode, layout.fontSize * FAUX_BOLD_STROKE)
@@ -250,9 +252,9 @@ async function drawField(
     const boxes = signatureBoxes(field, Boolean(caption))
     const image = imageId ? await embeddedImage(doc, res, shared, imageId) : null
     if (image) drawImageBox(page, image, boxes.image)
-    await drawTextBox(doc, page, res, field, caption, boxes.caption, input.fonts)
+    await drawTextBox(doc, page, res, field, caption, boxes.caption, input.fonts, values.graduationPalette)
   } else {
-    await drawTextBox(doc, page, res, field, resolveFieldText(field, values), full, input.fonts)
+    await drawTextBox(doc, page, res, field, resolveFieldText(field, values), full, input.fonts, values.graduationPalette)
   }
 
   page.pushOperators(popGraphicsState())
@@ -275,7 +277,8 @@ async function addCertificatePage(
   const values: CertificateValues = {
     name: student.name,
     graduation: student.graduation,
-    graduationTitle: input.graduationTitles?.[student.graduation] ?? '',
+    graduationTitle: titleOf(input.graduationSystem, student.graduation),
+    graduationPalette: input.graduationSystem?.colors ?? [],
     date: input.date,
     location: input.location,
     signerName: input.signerName,

@@ -9,8 +9,8 @@ import { resolveFieldText } from '@/lib/fieldText'
 import { createField } from '@/lib/fields'
 import { layoutText, type FontMetrics } from '@/lib/textLayout'
 import { resolveFont, BUILTIN_FONTS, metricsFromFont } from '@/lib/fonts'
-import { DEFAULT_GRADUATIONS, normalizeGraduations } from '@/lib/graduations'
-import { GRADUATION_COLORS, colorRuns } from '@/lib/colorRuns'
+import { colorRuns } from '@/lib/colorRuns'
+import { GRADUATION_PRESETS } from '@/lib/graduationSystems'
 
 describe('parseNames', () => {
   const expected = ['João da Silva', 'Maria Santos', 'Pedro Souza']
@@ -70,6 +70,7 @@ describe('resolveFieldText', () => {
     name: 'João da Silva',
     graduation: 'Verde',
     graduationTitle: '',
+    graduationPalette: [],
     date: '2026-10-02',
     location: 'Araçás - BA',
     signerName: 'Mestre Fulano',
@@ -131,31 +132,8 @@ describe('resolveFont', () => {
   })
 })
 
-describe('graduações', () => {
-  it('a lista é exatamente a especificada, com os títulos', () => {
-    expect(DEFAULT_GRADUATIONS.map((g) => g.name)).toEqual([
-      'Iniciante', 'Verde', 'Amarelo', 'Azul', 'Verde e Amarelo', 'Verde e Azul', 'Azul e Amarelo',
-      'Verde, Amarelo e Azul', 'Branco e Verde', 'Branco e Amarelo', 'Branco e Azul', 'Branco',
-    ])
-    const titles = Object.fromEntries(DEFAULT_GRADUATIONS.filter((g) => g.title).map((g) => [g.name, g.title]))
-    expect(titles).toEqual({
-      'Azul e Amarelo': 'Estagiário',
-      'Verde, Amarelo e Azul': 'Formado',
-      'Branco e Verde': 'Monitor',
-      'Branco e Amarelo': 'Professor',
-      'Branco e Azul': 'Contramestre',
-      Branco: 'Mestre',
-    })
-  })
-
-  it('lista antiga salva só com nomes ganha os títulos padrão', () => {
-    expect(normalizeGraduations(['Verde', 'Branco'])).toEqual([
-      { name: 'Verde', title: '' },
-      { name: 'Branco', title: 'Mestre' },
-    ])
-  })
-
-  const values = { name: 'Ana', graduation: 'Branco e Azul', graduationTitle: 'Contramestre', date: '', location: '', signerName: '' }
+describe('graduação no certificado', () => {
+  const values = { name: 'Ana', graduation: 'Branco e Azul', graduationTitle: 'Contramestre', graduationPalette: [], date: '', location: '', signerName: '' }
   const field = createField('graduation', 842, 595)
 
   it('mostra graduação e título por padrão', () => {
@@ -180,34 +158,47 @@ describe('graduações', () => {
 })
 
 describe('colorRuns', () => {
+  const palette = GRADUATION_PRESETS[0].colors
+  const hex = (word: string) => palette.find((c) => c.word === word)!.hex
   const mono: FontMetrics = { ascent: 0.8, descent: 0.2, measure: (t, s) => [...t].length * s * 0.5 }
   const field = { ...createField('graduation', 842, 595), style: { ...createField('graduation', 842, 595).style, color: '#000000' } }
 
   it('pinta cada cor com a própria cor e mantém o resto na cor do campo', () => {
-    const runs = colorRuns(field, 'Graduação: Verde e Amarelo', 10, 0, mono)
+    const runs = colorRuns(field, 'Graduação: Verde e Amarelo', 10, 0, mono, palette)
     expect(runs.map((r) => [r.text, r.color])).toEqual([
       ['Graduação: ', '#000000'],
-      ['Verde', GRADUATION_COLORS.verde],
+      ['Verde', hex('Verde')],
       [' e ', '#000000'],
-      ['Amarelo', GRADUATION_COLORS.amarelo],
+      ['Amarelo', hex('Amarelo')],
     ])
   })
   it('o título fica na cor do campo', () => {
-    const runs = colorRuns(field, 'Branco - Mestre', 10, 0, mono)
+    const runs = colorRuns(field, 'Branco - Mestre', 10, 0, mono, palette)
     expect(runs.map((r) => [r.text, r.color])).toEqual([
-      ['Branco', GRADUATION_COLORS.branco],
+      ['Branco', hex('Branco')],
       [' - Mestre', '#000000'],
     ])
   })
   it('calcula a posição de cada trecho com as métricas e o espaçamento', () => {
-    const runs = colorRuns(field, 'Verde e Azul', 10, 1, mono)
+    const runs = colorRuns(field, 'Verde e Azul', 10, 1, mono, palette)
     // "Verde e " tem 8 caracteres: 8 × 5 de largura + 8 × 1 de espaçamento
     expect(runs.find((r) => r.text === 'Azul')?.offset).toBe(48)
   })
+  it('usa a paleta de qualquer sistema, sem diferenciar maiúsculas', () => {
+    const judo = GRADUATION_PRESETS.find((p) => p.id === 'judo')!.colors
+    const runs = colorRuns(field, 'Faixa ROXA', 10, 0, mono, judo)
+    expect(runs.map((r) => [r.text, r.color])).toEqual([
+      ['Faixa ', '#000000'],
+      ['ROXA', judo.find((c) => c.word === 'Roxa')!.hex],
+    ])
+  })
+  it('sem paleta, tudo fica na cor do campo', () => {
+    expect(colorRuns(field, 'Verde', 10, 0, mono, [])).toHaveLength(1)
+  })
   it('ignora palavras que só contêm a cor e respeita a opção desligada', () => {
-    expect(colorRuns(field, 'Azulejo', 10, 0, mono)).toHaveLength(1)
-    expect(colorRuns({ ...field, colorizeGraduation: false }, 'Verde', 10, 0, mono)[0].color).toBe('#000000')
-    expect(colorRuns(createField('name', 842, 595), 'Verde', 10, 0, mono)[0].color).toBe('#000000')
+    expect(colorRuns(field, 'Azulejo', 10, 0, mono, palette)).toHaveLength(1)
+    expect(colorRuns({ ...field, colorizeGraduation: false }, 'Verde', 10, 0, mono, palette)[0].color).toBe('#000000')
+    expect(colorRuns(createField('name', 842, 595), 'Verde', 10, 0, mono, palette)[0].color).toBe('#000000')
   })
 })
 

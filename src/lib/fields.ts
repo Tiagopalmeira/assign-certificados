@@ -1,5 +1,6 @@
 import type { CertificateField, CertificateValues, FieldType, TemplateDefaults } from '@/types'
 import { createId } from './ids'
+import type { GraduationSystem } from './graduationSystems'
 
 export const DEFAULT_FONT_FAMILY = 'Inter'
 
@@ -23,12 +24,29 @@ export function fieldLabel(type: FieldType): string {
   return FIELD_TYPES.find((info) => info.type === type)?.label ?? type
 }
 
+/**
+ * Graduação de exemplo de um sistema: de preferência um nível com título e cor, para a
+ * prévia mostrar como tudo fica.
+ */
+function sampleLevel(system: GraduationSystem | null | undefined) {
+  const levels = system?.levels ?? []
+  const colored = (name: string) =>
+    system?.colors.some((c) => c.word && name.toLocaleLowerCase('pt-BR').includes(c.word.toLocaleLowerCase('pt-BR')))
+  return (
+    [...levels].reverse().find((l) => l.title && colored(l.name)) ??
+    levels.find((l) => colored(l.name)) ??
+    levels[0] ?? { name: 'Azul', title: '' }
+  )
+}
+
 /** Valores de exemplo usados no editor e nas miniaturas. */
-export function sampleValues(defaults: TemplateDefaults): CertificateValues {
+export function sampleValues(defaults: TemplateDefaults, system?: GraduationSystem | null): CertificateValues {
+  const level = sampleLevel(system)
   return {
     name: 'Maria Oliveira Santos',
-    graduation: 'Branco e Azul',
-    graduationTitle: 'Contramestre',
+    graduation: level.name,
+    graduationTitle: level.title,
+    graduationPalette: system?.colors ?? [{ word: 'Azul', hex: '#1D4FB8' }],
     date: defaults.date,
     location: defaults.location,
     signerName: defaults.signerName,

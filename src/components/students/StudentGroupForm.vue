@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { CircleAlert } from 'lucide-vue-next'
 import { parseNames } from '@/lib/names'
-import { useGraduationsStore } from '@/stores/graduations'
+import { useLotStore } from '@/stores/lot'
 
 /** Formulário de um grupo: escolhe a graduação e cola os nomes dos alunos. */
 const props = withDefaults(
@@ -19,13 +19,14 @@ const props = withDefaults(
 
 const emit = defineEmits<{ submit: [graduation: string, names: string[]]; cancel: [] }>()
 
-const graduations = useGraduationsStore()
+const lot = useLotStore()
+const levels = computed(() => lot.system?.levels ?? [])
 const uid = Math.random().toString(36).slice(2)
 
 const graduation = ref(
   props.initialGraduation ||
-    graduations.names.find((g) => !props.usedGraduations.includes(g)) ||
-    graduations.names[0] ||
+    levels.value.find((l) => !props.usedGraduations.includes(l.name))?.name ||
+    levels.value[0]?.name ||
     '',
 )
 const text = ref(props.initialNames.join('\n'))
@@ -63,7 +64,7 @@ function submit() {
     <div class="form-field graduation">
       <label class="form-label" :for="`graduation-${uid}`">Graduação</label>
       <select :id="`graduation-${uid}`" v-model="graduation" class="select">
-        <option v-for="item in graduations.list" :key="item.name" :value="item.name">{{ graduations.labelOf(item.name) }}</option>
+        <option v-for="item in levels" :key="item.id" :value="item.name">{{ lot.labelOf(item.name) }}</option>
       </select>
       <p v-if="mergeNotice" class="form-help">{{ mergeNotice }}</p>
     </div>

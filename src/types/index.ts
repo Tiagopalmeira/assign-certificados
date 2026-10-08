@@ -1,3 +1,5 @@
+import type { ColorWord } from '@/lib/graduationSystems'
+
 /** Tipos de campo que podem ser posicionados sobre o modelo. */
 export type FieldType = 'name' | 'graduation' | 'date' | 'location' | 'signature' | 'text' | 'image'
 
@@ -120,6 +122,8 @@ export interface CertificateValues {
   graduation: string
   /** Título da graduação (ex.: "Mestre"); vazio quando não há. */
   graduationTitle: string
+  /** Cores do sistema de graduação, usadas para pintar o nome da graduação. */
+  graduationPalette: ColorWord[]
   date: string
   location: string
   signerName: string

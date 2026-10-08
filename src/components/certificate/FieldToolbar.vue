@@ -24,6 +24,7 @@ function summary(fieldId: string) {
     name: 'nome',
     graduation: 'graduação',
     graduationTitle: 'título',
+    graduationPalette: [],
     date: editor.template.value.defaults.date,
     location: editor.template.value.defaults.location,
     signerName: editor.template.value.defaults.signerName,

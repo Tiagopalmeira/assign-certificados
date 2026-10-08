@@ -2,11 +2,11 @@
 import { computed } from 'vue'
 import { X } from 'lucide-vue-next'
 import type { StudentGroup } from '@/types'
-import { useGraduationsStore } from '@/stores/graduations'
+import { useLotStore } from '@/stores/lot'
 
 const props = defineProps<{ group: StudentGroup }>()
 const emit = defineEmits<{ edit: []; remove: []; removeStudent: [index: number] }>()
-const graduations = useGraduationsStore()
+const lot = useLotStore()
 
 const countLabel = computed(() => (props.group.names.length === 1 ? '1 aluno' : `${props.group.names.length} alunos`))
 </script>
@@ -15,7 +15,7 @@ const countLabel = computed(() => (props.group.names.length === 1 ? '1 aluno' : 
   <section class="group surface" :aria-label="`Graduação ${group.graduation}`">
     <header class="group__header">
       <div>
-        <h3 class="group__title">Graduação: {{ graduations.labelOf(group.graduation) }}</h3>
+        <h3 class="group__title">Graduação: {{ lot.labelOf(group.graduation) }}</h3>
         <p class="muted small">{{ countLabel }}</p>
       </div>
       <div class="group__actions">
