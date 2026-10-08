@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { CircleAlert } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
 import type { CertificateTemplate, FieldType } from '@/types'
 import { formatDate } from '@/lib/dates'
 import { useLotStore } from '@/stores/lot'
 import { useFilesStore } from '@/stores/files'
+import { useGraduationSystemsStore } from '@/stores/graduationSystems'
+import { useUiStore } from '@/stores/ui'
 import SignatureUpload from '@/components/certificate/SignatureUpload.vue'
 
 const props = defineProps<{ template: CertificateTemplate }>()
@@ -12,6 +15,8 @@ const emit = defineEmits<{ next: [] }>()
 
 const lot = useLotStore()
 const files = useFilesStore()
+const systems = useGraduationSystemsStore()
+const ui = useUiStore()
 const draft = computed(() => lot.draft!)
 const error = ref('')
 const replacing = ref(false)
@@ -19,6 +24,24 @@ const replacing = ref(false)
 const has = (type: FieldType) => props.template.fields.some((field) => field.type === type)
 const templateSignatureUrl = computed(() => files.urlFor(props.template.defaults.signatureImageId))
 const newSignatureUrl = computed(() => files.urlFor(draft.value.newSignatureId))
+async function onSystemChange(event: Event) {
+  const select = event.target as HTMLSelectElement
+  const systemId = select.value
+  if (draft.value.groups.length > 0) {
+    const ok = await ui.confirm({
+      title: 'Trocar sistema de graduação',
+      message: 'Os alunos já adicionados usam as graduações do sistema atual e serão removidos do lote.',
+      confirmLabel: 'Trocar e remover alunos',
+      danger: true,
+    })
+    if (!ok) {
+      select.value = lot.system?.id ?? ''
+      return
+    }
+  }
+  lot.setSystem(systemId)
+}
+
 const templateDateLabel = computed(() => formatDate(props.template.defaults.date) || 'sem data definida')
 
 async function onSignature(blob: Blob) {
@@ -49,6 +72,14 @@ function next() {
     <div>
       <h2 class="section-title">Dados do evento</h2>
       <p class="muted">Preencha uma vez. Estes dados valem para todos os certificados deste lote.</p>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="lot-system">Sistema de graduação</label>
+      <select id="lot-system" class="select" :value="lot.system?.id" @change="onSystemChange">
+        <option v-for="item in systems.sorted" :key="item.id" :value="item.id">{{ item.name }}</option>
+      </select>
+      <RouterLink to="/graduacoes" class="form-help">Criar ou editar sistemas de graduação</RouterLink>
     </div>
 
     <fieldset class="group">

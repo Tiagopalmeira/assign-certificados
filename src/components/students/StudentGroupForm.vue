@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { CircleAlert } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
 import { parseNames } from '@/lib/names'
 import { useLotStore } from '@/stores/lot'
 
@@ -60,9 +61,13 @@ function submit() {
 </script>
 
 <template>
-  <form class="group-form surface" novalidate @submit.prevent="submit">
+  <p v-if="levels.length === 0" class="notice notice--warning" role="alert">
+    O sistema "{{ lot.system?.name ?? 'escolhido' }}" ainda não tem graduações.
+    <RouterLink to="/graduacoes">Adicione as graduações</RouterLink> ou escolha outro sistema nos dados do evento.
+  </p>
+  <form v-else class="group-form surface" novalidate @submit.prevent="submit">
     <div class="form-field graduation">
-      <label class="form-label" :for="`graduation-${uid}`">Graduação</label>
+      <label class="form-label" :for="`graduation-${uid}`">{{ lot.system?.levelLabel ?? 'Graduação' }}</label>
       <select :id="`graduation-${uid}`" v-model="graduation" class="select">
         <option v-for="item in levels" :key="item.id" :value="item.name">{{ lot.labelOf(item.name) }}</option>
       </select>

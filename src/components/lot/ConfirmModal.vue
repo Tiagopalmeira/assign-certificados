@@ -49,7 +49,7 @@ const percent = computed(() =>
           <thead>
             <tr>
               <th scope="col">Nome</th>
-              <th scope="col">Graduação</th>
+              <th scope="col">{{ lot.system?.levelLabel ?? 'Graduação' }}</th>
             </tr>
           </thead>
           <tbody>

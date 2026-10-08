@@ -62,7 +62,7 @@ const plural = (count: number) => (count === 1 ? '1 aluno' : `${count} alunos`)
               <thead>
                 <tr>
                   <th scope="col">Nome</th>
-                  <th scope="col">Graduação</th>
+                  <th scope="col">{{ lot.system?.levelLabel ?? 'Graduação' }}</th>
                 </tr>
               </thead>
               <tbody>

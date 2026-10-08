@@ -34,6 +34,10 @@ const signatureText = computed(() => {
         <dd>{{ batch.location || 'Sem local' }}</dd>
       </div>
       <div>
+        <dt>Sistema de graduação</dt>
+        <dd>{{ lot.system?.name ?? 'Nenhum' }}</dd>
+      </div>
+      <div>
         <dt>Assinatura</dt>
         <dd>{{ signatureText }}</dd>
       </div>
