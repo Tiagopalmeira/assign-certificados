@@ -143,9 +143,9 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
             :value="field.graduationDisplay ?? 'graduation-title'"
             @change="editor.updateField(field.id, { graduationDisplay: ($event.target as HTMLSelectElement).value as GraduationDisplay }); editor.commit()"
           >
-            <option value="graduation-title">Graduação e título (Branco e Azul - Contramestre)</option>
-            <option value="graduation">Só a graduação (Branco e Azul)</option>
-            <option value="title">Só o título (Contramestre)</option>
+            <option value="graduation-title">Graduação e título (Preta - Professor)</option>
+            <option value="graduation">Só a graduação (Preta)</option>
+            <option value="title">Só o título (Professor)</option>
           </select>
           <span class="form-help">Graduações sem título mostram só a graduação.</span>
         </div>
@@ -155,8 +155,9 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
             :checked="field.colorizeGraduation !== false"
             @change="editor.updateField(field.id, { colorizeGraduation: ($event.target as HTMLInputElement).checked }); editor.commit()"
           />
-          Pintar cada cor com a própria cor (verde, amarelo, azul, branco)
+          Pintar as cores com a própria cor
         </label>
+        <span class="form-help">As cores de cada palavra (Azul, Roxa…) ficam no sistema de graduação, em Graduações.</span>
       </template>
 
       <template v-if="field.type === 'date'">
@@ -216,7 +217,7 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
             :id="id('signer')"
             class="input input--sm"
             type="text"
-            placeholder="Mestre Fulano"
+            placeholder="Prof. Ana Lima"
             :value="defaults.signerName"
             @input="editor.updateDefaults({ signerName: ($event.target as HTMLInputElement).value })"
             @change="editor.commit()"

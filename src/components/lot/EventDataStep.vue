@@ -109,7 +109,7 @@ function next() {
       <legend class="form-label">Assinatura</legend>
       <div class="form-field">
         <label class="form-label form-label--light" for="lot-signer">Nome de quem assina</label>
-        <input id="lot-signer" v-model="draft.signerName" class="input" type="text" placeholder="Mestre Fulano" />
+        <input id="lot-signer" v-model="draft.signerName" class="input" type="text" placeholder="Prof. Ana Lima" />
       </div>
 
       <template v-if="has('signature')">

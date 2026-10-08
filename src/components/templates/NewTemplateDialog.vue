@@ -82,7 +82,7 @@ async function submit() {
       />
       <div class="form-field">
         <label class="form-label" for="template-name">Nome do modelo</label>
-        <input id="template-name" v-model="name" class="input" type="text" placeholder="Certificado Capoeira 2026" :disabled="busy" />
+        <input id="template-name" v-model="name" class="input" type="text" placeholder="Certificado de graduação 2026" :disabled="busy" />
       </div>
       <p v-if="error" class="form-error" role="alert">
         <CircleAlert :size="16" aria-hidden="true" />

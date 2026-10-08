@@ -1,7 +1,7 @@
 # CertAssign
 
-Sistema web para criar modelos de certificado e gerar certificados em lote, feito para
-eventos de capoeira (batizados e trocas de cordas).
+Sistema web para criar modelos de certificado e gerar certificados de graduação em lote,
+para qualquer modalidade com graduações: capoeira, judô, jiu-jitsu, karatê e outras.
 
 Você configura o modelo uma vez e depois gera dezenas de certificados informando só os
 nomes dos alunos e as graduações.
@@ -23,19 +23,22 @@ npm test           # testes automáticos
 
 ## Como usar
 
-1. **Meus modelos** → *Criar novo modelo*. Envie a arte em PDF, PNG ou JPG. No PDF, só a
+1. **Graduações** (opcional): confira os sistemas prontos ou crie o seu, com as
+   graduações em ordem, títulos e cores.
+2. **Meus modelos** → *Criar novo modelo*. Envie a arte em PDF, PNG ou JPG. No PDF, só a
    primeira página é usada.
-2. **Editor**: adicione os campos (Nome, Graduação, Data, Local, Assinatura, Texto,
+3. **Editor**: adicione os campos (Nome, Graduação, Data, Local, Assinatura, Texto,
    Imagem), arraste e redimensione sobre o certificado e ajuste fonte, tamanho, cor,
-   alinhamento, negrito, itálico, espaçamento e rotação no painel da direita. Salve.
-3. **Gerar certificados** abre o *Novo lote*:
-   - **Dados do evento**: data (a do modelo ou uma nova), local e assinatura (a do
+   alinhamento, negrito, itálico, espaçamento e rotação no painel da direita. Em *Dados do
+   modelo*, escolha o sistema de graduação padrão. Salve.
+4. **Gerar certificados** abre o *Novo lote*:
+   - **Dados do evento**: sistema de graduação (judô, capoeira…), data (a do modelo ou uma nova), local e assinatura (a do
      modelo ou uma nova; o fundo da imagem é removido automaticamente).
    - **Alunos**: escolha a graduação e cole os nomes, separados por linha, vírgula ou
      ponto e vírgula. Repita para cada graduação.
    - **Revisão**: resumo, lista completa e prévia de cada certificado.
-4. **Concluir** → confira tudo na janela de confirmação → **Gerar certificados**.
-5. Baixe o `certificados.zip` (um PDF por aluno), um PDF único para imprimir, ou cada
+5. **Concluir** → confira tudo na janela de confirmação → **Gerar certificados**.
+6. Baixe o `certificados.zip` (um PDF por aluno), um PDF único para imprimir, ou cada
    certificado separadamente.
 
 Atalhos no editor: `Ctrl+S` salva, `Ctrl+Z` / `Ctrl+Shift+Z` desfaz e refaz, as setas
@@ -47,8 +50,8 @@ No campo **Texto**, você pode usar `{nome}`, `{graduacao}`, `{titulo}`, `{data}
 
 ## Onde ficam os dados
 
-Tudo fica salvo **no próprio navegador** (IndexedDB): modelos, imagens, assinaturas e
-fontes enviadas. Não há servidor. Por isso:
+Tudo fica salvo **no próprio navegador** (IndexedDB): modelos, imagens, assinaturas,
+fontes enviadas e sistemas de graduação. Não há servidor. Por isso:
 
 - outro navegador ou outro computador não vê os mesmos modelos;
 - limpar os dados do site apaga os modelos.
@@ -74,18 +77,20 @@ src/
 │   ├── signature.ts      remoção do fundo da assinatura
 │   ├── names.ts          separação dos nomes digitados
 │   ├── filename.ts       nomes de arquivo seguros (João da Silva → Joao_da_Silva.pdf)
-│   ├── graduations.ts    lista inicial de graduações
+│   ├── graduationSystems.ts sistemas de graduação e listas prontas
+│   ├── colorRuns.ts      cores das palavras da graduação
 │   └── db.ts             persistência (IndexedDB)
-├── stores/             estado (Pinia): modelos, fontes, graduações, lote, arquivos, avisos
+├── stores/             estado (Pinia): modelos, fontes, sistemas de graduação, lote, arquivos, avisos
 ├── composables/        estado do editor (seleção, desfazer/refazer, salvar)
 ├── components/
 │   ├── certificate/      editor e prévia (CertificateCanvas, CertificateField,
 │   │                     FieldProperties, FieldToolbar, CertificatePreview…)
 │   ├── students/         grupos de alunos por graduação
+│   ├── graduations/      telas dos sistemas de graduação
 │   ├── lot/              etapas do lote, confirmação e downloads
 │   ├── templates/        cartões e criação de modelo
 │   └── ui/               modal, avisos, envio de arquivo
-└── views/              telas: Meus modelos, Editor, Novo lote, Fontes
+└── views/              telas: Meus modelos, Editor, Novo lote, Graduações, Fontes
 ```
 
 ### Prévia igual ao PDF
@@ -99,29 +104,24 @@ simulam o estilo do mesmo jeito.
 Modelos em PDF continuam vetoriais no certificado final: a página original é embutida e
 os campos são escritos por cima.
 
-### Graduações
+### Sistemas de graduação
 
-A lista inicial fica em `src/lib/graduations.ts`. Algumas graduações conferem um título:
+Cada sistema é a sequência de graduações de uma modalidade, grupo ou federação. Tem:
 
-| Graduação | Título |
-|---|---|
-| Azul e Amarelo | Estagiário |
-| Verde, Amarelo e Azul | Formado |
-| Branco e Verde | Monitor |
-| Branco e Amarelo | Professor |
-| Branco e Azul | Contramestre |
-| Branco | Mestre |
+- **nome** (ex.: "Judô – Federação Paulista");
+- **como a graduação é chamada** ("Faixa", "Corda"…), usado nas telas do lote;
+- **cores**: palavra → cor. Quando a palavra aparece no nome da graduação ("Roxa",
+  "Branco e Azul"), ela sai com essa cor no certificado;
+- **graduações em ordem**, cada uma com título opcional (ex.: Professor, Mestre).
+
+Na primeira execução entram listas prontas, que servem de ponto de partida e podem ser
+editadas: **Capoeira**, **Judô**, **Jiu-Jitsu (adulto)**, **Jiu-Jitsu (infantil)** e
+**Karatê** (`src/lib/graduationSystems.ts`). Cada grupo ou federação pode ter variações.
 
 No editor, o campo **Graduação** tem a opção *Mostrar*: graduação e título
-("Branco e Azul - Contramestre", o padrão), só a graduação ou só o título. Graduações sem
-título mostram só a graduação. No campo **Texto**, use `{titulo}`.
-
-Cada cor no nome da graduação sai na própria cor (verde, amarelo, azul, branco). Dá
-para desligar isso no campo **Graduação** ("Pintar cada cor com a própria cor"). As cores
-ficam em `src/lib/colorRuns.ts`.
-
-A lista fica salva no banco. A store `useGraduationsStore` já tem `save(lista)`; para
-tornar a lista editável, falta só a tela.
+("Preta - Professor", o padrão), só a graduação ou só o título. Graduações sem título
+mostram só a graduação. A pintura das cores pode ser desligada no campo. No campo
+**Texto**, use `{titulo}`.
 
 ## Limitações conhecidas
 

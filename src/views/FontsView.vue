@@ -12,7 +12,7 @@ const fonts = useFontsStore()
 const templates = useTemplatesStore()
 const ui = useUiStore()
 
-const SAMPLE = 'Certificamos que João da Silva concluiu o batizado'
+const SAMPLE = 'Certificamos que João da Silva recebeu a faixa azul'
 
 const pendingFile = ref<File | null>(null)
 const family = ref('')

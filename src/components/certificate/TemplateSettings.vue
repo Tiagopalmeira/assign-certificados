@@ -70,7 +70,7 @@ const sourceDescription = computed(() => {
           id="tpl-signer"
           class="input input--sm"
           type="text"
-          placeholder="Mestre Fulano"
+          placeholder="Prof. Ana Lima"
           :value="defaults.signerName"
           @input="editor.updateDefaults({ signerName: ($event.target as HTMLInputElement).value })"
           @change="editor.commit()"
