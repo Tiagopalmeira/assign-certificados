@@ -24,6 +24,12 @@ describe('parseNames', () => {
   it('aceita ponto e vírgula', () => {
     expect(parseNames('João da Silva; Maria Santos; Pedro Souza')).toEqual(expected)
   })
+  it('remove pontos finais digitados sem querer', () => {
+    expect(parseNames('João da Silva.\nMaria Santos. ; Pedro Souza...,  .')).toEqual(expected)
+  })
+  it('mantém pontos no meio do nome', () => {
+    expect(parseNames('J. P. Souza.')).toEqual(['J. P. Souza'])
+  })
   it('aceita separadores misturados e ignora vazios e espaços extras', () => {
     expect(parseNames('  João   da Silva ;\n\n Maria Santos,,Pedro Souza;')).toEqual(expected)
   })
