@@ -49,6 +49,12 @@ export const router = createRouter({
       component: () => import('@/views/FontsView.vue'),
       meta: { title: 'Fontes' },
     },
+    {
+      path: '/backup',
+      name: 'backup',
+      component: () => import('@/views/BackupView.vue'),
+      meta: { title: 'Backup' },
+    },
     { path: '/:pathMatch(.*)*', redirect: '/modelos' },
   ],
 })
