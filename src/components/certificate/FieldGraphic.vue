@@ -145,6 +145,9 @@ const placeholderFontSize = computed(() => Math.max(6, Math.min(props.field.heig
 .field-text {
   white-space: pre;
   font-kerning: none;
+  /* Igual ao PDF: sem ligaduras nem letras alternativas (ver LAYOUT_FEATURES). */
+  font-variant-ligatures: none;
+  font-feature-settings: 'liga' 0, 'clig' 0, 'dlig' 0, 'calt' 0, 'rlig' 0, 'ccmp' 0;
 }
 
 .placeholder rect {

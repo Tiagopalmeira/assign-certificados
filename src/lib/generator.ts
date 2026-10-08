@@ -30,7 +30,7 @@ import type {
 } from '@/types'
 import { hexToRgb } from './color'
 import { resolveFieldText, isMultiline } from './fieldText'
-import { FAUX_BOLD_STROKE, FAUX_ITALIC_SKEW, loadFontBytes, loadFontkitFont, metricsFromFont, resolveFont } from './fonts'
+import { FAUX_BOLD_STROKE, FAUX_ITALIC_SKEW, LAYOUT_FEATURES, loadFontBytes, loadFontkitFont, metricsFromFont, resolveFont } from './fonts'
 import { fontkit } from './fontkit'
 import { containRect, layoutText } from './textLayout'
 import { colorRuns } from './colorRuns'
@@ -131,7 +131,7 @@ async function embeddedFont(doc: PDFDocument, res: DocResources, variant: FontVa
   if (!font) {
     // loadFontBytes já entrega TTF/OTF. A fonte vai inteira (sem subset): o subset do
     // fontkit falha com algumas fontes, e a fonte inteira funciona em qualquer leitor de PDF.
-    font = await doc.embedFont(await loadFontBytes(variant))
+    font = await doc.embedFont(await loadFontBytes(variant), { features: LAYOUT_FEATURES })
     res.fonts.set(variant.id, font)
   }
   return font

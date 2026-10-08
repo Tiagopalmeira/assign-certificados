@@ -68,6 +68,21 @@ export function forgetFont(variantId: string) {
 }
 
 /**
+ * Recursos OpenType que trocam letras por outras (ligaduras e alternativas contextuais).
+ * Ficam desligados: o pdf-lib escreve a letra trocada no PDF, mas só registra a largura das
+ * letras normais, e o leitor de PDF abre um buraco no texto (ex.: "Damacen o" na Great Vibes).
+ * Vale para a medição, o PDF e a prévia, que assim continuam iguais.
+ */
+export const LAYOUT_FEATURES = {
+  liga: false,
+  clig: false,
+  dlig: false,
+  calt: false,
+  rlig: false,
+  ccmp: false,
+} as const
+
+/**
  * Métricas a partir do fontkit. A largura soma o avanço de cada glifo, exatamente como o
  * pdf-lib faz ao escrever o texto, para que a prévia e o PDF quebrem as linhas igual.
  */
@@ -80,7 +95,7 @@ export function metricsFromFont(font: Font): FontMetrics {
     descent,
     measure(text, size) {
       if (!text) return 0
-      const glyphs = font.layout(text).glyphs
+      const glyphs = font.layout(text, LAYOUT_FEATURES).glyphs
       let total = 0
       for (const glyph of glyphs) total += glyph.advanceWidth
       return (total / unitsPerEm) * size
