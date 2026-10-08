@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
-import type { CertificateBatch, CertificateTemplate, Student, StudentGroup } from '@/types'
+import type { CertificateBatch, CertificateTemplate, LotRecord, Student, StudentGroup } from '@/types'
 import { createId } from '@/lib/ids'
 import { todayIso } from '@/lib/dates'
 import { graduationLabel, previousLevelOf, titleOf } from '@/lib/graduationSystems'
 import { studentsOf } from '@/lib/values'
+import { filesRepo } from '@/lib/db'
 import { useFilesStore } from './files'
 import { useGraduationSystemsStore } from './graduationSystems'
 
@@ -91,6 +92,26 @@ export const useLotStore = defineStore('lot', () => {
   async function reset(template: CertificateTemplate) {
     await discardNewSignature()
     draft.value = emptyDraft(template, draft.value?.systemId ?? defaultSystemId(template))
+  }
+
+  /**
+   * Abre um lote do histórico como rascunho, para corrigir e gerar de novo. O rascunho
+   * ganha a própria cópia da assinatura: ela é apagada quando o rascunho é descartado.
+   */
+  async function openRecord(template: CertificateTemplate, record: LotRecord) {
+    await discardNewSignature()
+    const signatureCopy = record.signatureId ? await filesRepo.copy(record.signatureId) : null
+    draft.value = {
+      templateId: template.id,
+      systemId: systems.byId(record.systemId)?.id ?? defaultSystemId(template),
+      dateMode: 'custom',
+      customDate: record.date,
+      location: record.location,
+      signerName: record.signerName,
+      useTemplateSignature: false,
+      newSignatureId: signatureCopy,
+      groups: record.groups.map((group) => ({ ...group, id: createId(), names: [...group.names] })),
+    }
   }
 
   /** Troca o sistema de graduação. Os grupos de alunos são do sistema anterior e saem. */
@@ -211,6 +232,7 @@ export const useLotStore = defineStore('lot', () => {
     summary,
     start,
     reset,
+    openRecord,
     setNewSignature,
     discardNewSignature,
     addGroup,

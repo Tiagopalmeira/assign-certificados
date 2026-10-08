@@ -25,6 +25,12 @@ export const router = createRouter({
       meta: { title: 'Novo lote' },
     },
     {
+      path: '/lotes',
+      name: 'lots',
+      component: () => import('@/views/LotsView.vue'),
+      meta: { title: 'Lotes gerados' },
+    },
+    {
       path: '/graduacoes',
       name: 'graduation-systems',
       component: () => import('@/views/GraduationSystemsView.vue'),

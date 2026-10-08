@@ -59,7 +59,10 @@ function downloadOne(certificate: GeneratedCertificate) {
       <CircleCheck :size="28" class="result__icon" aria-hidden="true" />
       <div>
         <h2 class="page-title result__title">{{ title }}</h2>
-        <p class="muted">Baixe todos de uma vez ou cada um separadamente.</p>
+        <p class="muted">
+          Baixe todos de uma vez ou cada um separadamente. O lote também fica salvo em
+          <RouterLink to="/lotes">Lotes</RouterLink> para baixar de novo depois.
+        </p>
       </div>
     </header>
 

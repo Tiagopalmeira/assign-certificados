@@ -34,6 +34,7 @@ onMounted(async () => {
       </RouterLink>
       <nav class="nav" aria-label="Principal">
         <RouterLink to="/modelos" class="nav__link" active-class="nav__link--active">Meus modelos</RouterLink>
+        <RouterLink to="/lotes" class="nav__link" active-class="nav__link--active">Lotes</RouterLink>
         <RouterLink to="/graduacoes" class="nav__link" active-class="nav__link--active">Graduações</RouterLink>
         <RouterLink to="/fontes" class="nav__link" active-class="nav__link--active">Fontes</RouterLink>
       </nav>
@@ -85,6 +86,8 @@ onMounted(async () => {
 .nav {
   display: flex;
   gap: var(--esp-1);
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .nav__link {
@@ -97,6 +100,7 @@ onMounted(async () => {
   font-size: var(--texto-sm);
   font-weight: var(--peso-medio);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav__link:hover {
@@ -117,6 +121,10 @@ onMounted(async () => {
 @media (max-width: 480px) {
   .brand span {
     display: none;
+  }
+
+  .nav__link {
+    padding: 0 var(--esp-2);
   }
 }
 </style>
