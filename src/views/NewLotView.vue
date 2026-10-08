@@ -7,6 +7,7 @@ import { useTemplatesStore } from '@/stores/templates'
 import { useFontsStore } from '@/stores/fonts'
 import { useFilesStore } from '@/stores/files'
 import { useLotStore } from '@/stores/lot'
+import { useLotsStore } from '@/stores/lots'
 import { errorMessage, useUiStore } from '@/stores/ui'
 import EventDataStep from '@/components/lot/EventDataStep.vue'
 import StudentsStep from '@/components/lot/StudentsStep.vue'
@@ -20,6 +21,7 @@ const templates = useTemplatesStore()
 const fonts = useFontsStore()
 const files = useFilesStore()
 const lot = useLotStore()
+const history = useLotsStore()
 const ui = useUiStore()
 
 const template = computed(() => templates.byId(props.id))
@@ -70,11 +72,32 @@ async function generate() {
     lastInput = input
     confirming.value = false
     go('done')
+    await saveToHistory(input)
   } catch (error) {
     console.error(error)
     ui.notify(errorMessage(error, 'Não foi possível gerar os certificados. Tente novamente.'), 'error')
   } finally {
     progress.value = null
+  }
+}
+
+/** Guarda o lote no histórico. Uma falha aqui não atrapalha o download. */
+async function saveToHistory(input: GenerationInput) {
+  try {
+    await history.record({
+      templateId: input.template.id,
+      templateName: input.template.name,
+      systemId: lot.system?.id ?? null,
+      systemName: lot.system?.name ?? '',
+      date: input.date,
+      location: input.location,
+      signerName: input.signerName,
+      signatureId: input.signatureId,
+      groups: lot.draft?.groups ?? [],
+    })
+  } catch (error) {
+    console.error(error)
+    ui.notify('Os certificados foram gerados, mas o lote não foi salvo no histórico.', 'info')
   }
 }
 

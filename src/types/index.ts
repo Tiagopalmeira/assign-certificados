@@ -122,6 +122,25 @@ export interface StudentGroup {
   names: string[]
 }
 
+/** Lote já gerado, guardado para baixar de novo ou abrir para corrigir. */
+export interface LotRecord {
+  id: string
+  createdAt: string
+  templateId: string
+  /** Nome do modelo na hora da geração (ele pode ser renomeado ou excluído depois). */
+  templateName: string
+  systemId: string | null
+  systemName: string
+  date: string
+  location: string
+  signerName: string
+  /** Cópia própria da assinatura usada, para não depender do modelo nem do rascunho. */
+  signatureId: string | null
+  groups: StudentGroup[]
+  /** Total de certificados do lote. */
+  count: number
+}
+
 /** Valores usados para preencher um certificado. */
 export interface CertificateValues {
   name: string

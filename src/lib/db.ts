@@ -1,11 +1,12 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
-import type { CertificateTemplate, FontVariant, StoredFile } from '@/types'
+import type { CertificateTemplate, FontVariant, LotRecord, StoredFile } from '@/types'
 import type { GraduationSystem } from './graduationSystems'
 import { createId } from './ids'
 
 /**
  * Persistência local no navegador (IndexedDB). Modelos, arquivos (fundos, imagens,
- * assinaturas), fontes enviadas, sistemas de graduação e configurações ficam salvos neste aparelho.
+ * assinaturas), fontes enviadas, sistemas de graduação, lotes gerados e configurações ficam salvos
+ * neste aparelho.
  */
 interface CertDB extends DBSchema {
   templates: { key: string; value: CertificateTemplate }
@@ -13,12 +14,13 @@ interface CertDB extends DBSchema {
   fonts: { key: string; value: FontVariant }
   settings: { key: string; value: unknown }
   graduationSystems: { key: string; value: GraduationSystem }
+  lots: { key: string; value: LotRecord }
 }
 
 let dbPromise: Promise<IDBPDatabase<CertDB>> | null = null
 
 function db() {
-  dbPromise ??= openDB<CertDB>('cert-assign', 2, {
+  dbPromise ??= openDB<CertDB>('cert-assign', 3, {
     upgrade(database, oldVersion) {
       if (oldVersion < 1) {
         database.createObjectStore('templates', { keyPath: 'id' })
@@ -27,6 +29,7 @@ function db() {
         database.createObjectStore('settings')
       }
       if (oldVersion < 2) database.createObjectStore('graduationSystems', { keyPath: 'id' })
+      if (oldVersion < 3) database.createObjectStore('lots', { keyPath: 'id' })
     },
   })
   return dbPromise
@@ -91,6 +94,18 @@ export const graduationSystemsRepo = {
   },
   async remove(id: string) {
     await (await db()).delete('graduationSystems', id)
+  },
+}
+
+export const lotsRepo = {
+  async list() {
+    return (await db()).getAll('lots')
+  },
+  async put(lot: LotRecord) {
+    await (await db()).put('lots', plain(lot))
+  },
+  async remove(id: string) {
+    await (await db()).delete('lots', id)
   },
 }
 

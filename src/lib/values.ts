@@ -1,4 +1,4 @@
-import type { CertificateValues, Student } from '@/types'
+import type { CertificateValues, Student, StudentGroup } from '@/types'
 import { previousLevelOf, titleOf, type GraduationSystem } from './graduationSystems'
 
 export interface EventValues {
@@ -28,4 +28,11 @@ export function studentValues(
     location: event.location,
     signerName: event.signerName,
   }
+}
+
+/** Alunos dos grupos, na ordem em que aparecem. */
+export function studentsOf(groups: readonly StudentGroup[]): Student[] {
+  return groups.flatMap((group) =>
+    group.names.map((name) => ({ name, graduation: group.graduation, previousGraduation: group.previousGraduation })),
+  )
 }

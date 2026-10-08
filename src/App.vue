@@ -4,6 +4,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useTemplatesStore } from '@/stores/templates'
 import { useFontsStore } from '@/stores/fonts'
 import { useGraduationSystemsStore } from '@/stores/graduationSystems'
+import { useLotsStore } from '@/stores/lots'
 import ToastHost from '@/components/ui/ToastHost.vue'
 import ConfirmHost from '@/components/ui/ConfirmHost.vue'
 
@@ -13,7 +14,7 @@ const loadError = ref('')
 
 onMounted(async () => {
   try {
-    await Promise.all([useTemplatesStore().init(), useFontsStore().init(), useGraduationSystemsStore().init()])
+    await Promise.all([useTemplatesStore().init(), useFontsStore().init(), useGraduationSystemsStore().init(), useLotsStore().init()])
   } catch (error) {
     console.error(error)
     loadError.value =

@@ -4,6 +4,7 @@ import type { CertificateBatch, CertificateTemplate, Student, StudentGroup } fro
 import { createId } from '@/lib/ids'
 import { todayIso } from '@/lib/dates'
 import { graduationLabel, previousLevelOf, titleOf } from '@/lib/graduationSystems'
+import { studentsOf } from '@/lib/values'
 import { useFilesStore } from './files'
 import { useGraduationSystemsStore } from './graduationSystems'
 
@@ -166,11 +167,7 @@ export const useLotStore = defineStore('lot', () => {
     if (group.names.length === 0) removeGroup(groupId)
   }
 
-  const students = computed<Student[]>(() =>
-    (draft.value?.groups ?? []).flatMap((group) =>
-      group.names.map((name) => ({ name, graduation: group.graduation, previousGraduation: group.previousGraduation })),
-    ),
-  )
+  const students = computed<Student[]>(() => studentsOf(draft.value?.groups ?? []))
 
   const summary = computed(() =>
     (draft.value?.groups ?? []).map((group) => ({
