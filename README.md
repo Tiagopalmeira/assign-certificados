@@ -35,7 +35,8 @@ npm test           # testes automáticos
    - **Dados do evento**: sistema de graduação (judô, capoeira…), data (a do modelo ou uma nova), local e assinatura (a do
      modelo ou uma nova; o fundo da imagem é removido automaticamente).
    - **Alunos**: escolha a graduação e cole os nomes, separados por linha, vírgula ou
-     ponto e vírgula. Repita para cada graduação.
+     ponto e vírgula. Repita para cada graduação. Se o modelo mostra a graduação
+     anterior, ela é a que vem antes no sistema; dá para escolher outra no grupo.
    - **Revisão**: resumo, lista completa e prévia de cada certificado.
 5. **Concluir** → confira tudo na janela de confirmação → **Gerar certificados**.
 6. Baixe o `certificados.zip` (um PDF por aluno), um PDF único para imprimir, ou cada
@@ -45,7 +46,7 @@ Atalhos no editor: `Ctrl+S` salva, `Ctrl+Z` / `Ctrl+Shift+Z` desfaz e refaz, as 
 movem o campo selecionado (com `Shift`, de 10 em 10), `Delete` exclui o campo e
 `Ctrl+D` duplica.
 
-No campo **Texto**, você pode usar `{nome}`, `{graduacao}`, `{titulo}`, `{data}`,
+No campo **Texto**, você pode usar `{nome}`, `{graduacao}`, `{graduacao_anterior}`, `{titulo}`, `{data}`,
 `{local}` e `{assinatura}`. Exemplo: `Certificamos que {nome} recebeu a graduação {graduacao}.`
 
 ## Onde ficam os dados
@@ -122,6 +123,11 @@ No editor, o campo **Graduação** tem a opção *Mostrar*: graduação e títul
 ("Preta - Professor", o padrão), só a graduação ou só o título. Graduações sem título
 mostram só a graduação. A pintura das cores pode ser desligada no campo. No campo
 **Texto**, use `{titulo}`.
+
+O campo **Graduação anterior** mostra de onde o aluno veio ("de Azul para Verde e
+Amarelo"), com as mesmas opções. Por padrão é a graduação que vem antes no sistema;
+no lote, cada grupo pode escolher outra (quem pulou graduação) ou nenhuma. No campo
+**Texto**, use `{graduacao_anterior}`.
 
 ## Limitações conhecidas
 
