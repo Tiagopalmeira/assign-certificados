@@ -117,3 +117,50 @@ export const settingsRepo = {
     await (await db()).put('settings', plain(value), key)
   },
 }
+
+/** Tudo o que fica salvo no navegador, para o backup. */
+export interface AllData {
+  templates: CertificateTemplate[]
+  files: StoredFile[]
+  fonts: FontVariant[]
+  graduationSystems: GraduationSystem[]
+  lots: LotRecord[]
+  settings: { key: string; value: unknown }[]
+}
+
+export async function readAllData(): Promise<AllData> {
+  const database = await db()
+  const settingKeys = await database.getAllKeys('settings')
+  return {
+    templates: await database.getAll('templates'),
+    files: await database.getAll('files'),
+    fonts: await database.getAll('fonts'),
+    graduationSystems: await database.getAll('graduationSystems'),
+    lots: await database.getAll('lots'),
+    settings: await Promise.all(settingKeys.map(async (key) => ({ key, value: await database.get('settings', key) }))),
+  }
+}
+
+/** Apaga tudo e grava os dados do backup, numa transação só: ou entra tudo, ou nada muda. */
+export async function replaceAllData(data: AllData) {
+  const database = await db()
+  const tx = database.transaction(['templates', 'files', 'fonts', 'graduationSystems', 'lots', 'settings'], 'readwrite')
+  const stores = {
+    templates: tx.objectStore('templates'),
+    files: tx.objectStore('files'),
+    fonts: tx.objectStore('fonts'),
+    graduationSystems: tx.objectStore('graduationSystems'),
+    lots: tx.objectStore('lots'),
+    settings: tx.objectStore('settings'),
+  }
+  await Promise.all([
+    ...Object.values(stores).map((store) => store.clear()),
+    ...data.templates.map((item) => stores.templates.put(plain(item))),
+    ...data.files.map((item) => stores.files.put(item)),
+    ...data.fonts.map((item) => stores.fonts.put(item)),
+    ...data.graduationSystems.map((item) => stores.graduationSystems.put(plain(item))),
+    ...data.lots.map((item) => stores.lots.put(plain(item))),
+    ...data.settings.map((item) => stores.settings.put(plain(item.value), item.key)),
+    tx.done,
+  ])
+}
