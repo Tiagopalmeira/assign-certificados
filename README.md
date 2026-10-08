@@ -41,6 +41,8 @@ npm test           # testes automáticos
 5. **Concluir** → confira tudo na janela de confirmação → **Gerar certificados**.
 6. Baixe o `certificados.zip` (um PDF por aluno), um PDF único para imprimir, ou cada
    certificado separadamente.
+7. O lote fica salvo em **Lotes**: dá para baixar de novo ou abrir para corrigir um nome e
+   gerar outra vez.
 
 Atalhos no editor: `Ctrl+S` salva, `Ctrl+Z` / `Ctrl+Shift+Z` desfaz e refaz, as setas
 movem o campo selecionado (com `Shift`, de 10 em 10), `Delete` exclui o campo e
@@ -52,10 +54,16 @@ No campo **Texto**, você pode usar `{nome}`, `{graduacao}`, `{graduacao_anterio
 ## Onde ficam os dados
 
 Tudo fica salvo **no próprio navegador** (IndexedDB): modelos, imagens, assinaturas,
-fontes enviadas e sistemas de graduação. Não há servidor. Por isso:
+fontes enviadas, sistemas de graduação e lotes gerados. Não há servidor. Por isso:
 
 - outro navegador ou outro computador não vê os mesmos modelos;
 - limpar os dados do site apaga os modelos.
+
+Em **Backup**, baixe um `.zip` com tudo e restaure em outro navegador ou depois de limpar
+os dados. Restaurar troca tudo o que está salvo pelo conteúdo do backup.
+
+Os lotes do histórico guardam os dados (alunos, evento, uma cópia da assinatura), não os
+PDFs. Baixar de novo gera os certificados com o modelo como ele está no momento.
 
 O lote em andamento fica salvo como rascunho, então os nomes digitados não se perdem se a
 página for recarregada.
@@ -91,7 +99,7 @@ src/
 │   ├── lot/              etapas do lote, confirmação e downloads
 │   ├── templates/        cartões e criação de modelo
 │   └── ui/               modal, avisos, envio de arquivo
-└── views/              telas: Meus modelos, Editor, Novo lote, Graduações, Fontes
+└── views/              telas: Meus modelos, Editor, Novo lote, Lotes, Graduações, Fontes, Backup
 ```
 
 ### Prévia igual ao PDF
