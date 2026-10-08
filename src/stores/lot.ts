@@ -57,8 +57,9 @@ export const useLotStore = defineStore('lot', () => {
   /** Sistema de graduação do lote (ou o padrão, se o escolhido foi excluído). */
   const system = computed(() => systems.resolve(draft.value?.systemId))
 
-  function defaultSystemId(): string | null {
-    return systems.fallback?.id ?? null
+  /** O sistema do modelo, ou o padrão quando o modelo não tem (ou ele foi excluído). */
+  function defaultSystemId(template: CertificateTemplate): string | null {
+    return systems.resolve(template.defaults.graduationSystemId)?.id ?? null
   }
 
   watch(
@@ -79,16 +80,16 @@ export const useLotStore = defineStore('lot', () => {
     if (draft.value?.templateId === template.id) {
       if (!template.defaults.signatureImageId) draft.value.useTemplateSignature = false
       // Rascunhos de versões anteriores não tinham sistema.
-      if (!systems.byId(draft.value.systemId)) draft.value.systemId = system.value?.id ?? defaultSystemId()
+      if (!systems.byId(draft.value.systemId)) draft.value.systemId = defaultSystemId(template)
       return
     }
     void discardNewSignature()
-    draft.value = emptyDraft(template, defaultSystemId())
+    draft.value = emptyDraft(template, defaultSystemId(template))
   }
 
   async function reset(template: CertificateTemplate) {
     await discardNewSignature()
-    draft.value = emptyDraft(template, draft.value?.systemId ?? defaultSystemId())
+    draft.value = emptyDraft(template, draft.value?.systemId ?? defaultSystemId(template))
   }
 
   /** Troca o sistema de graduação. Os grupos de alunos são do sistema anterior e saem. */

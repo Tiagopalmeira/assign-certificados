@@ -60,6 +60,8 @@ export interface TemplateDefaults {
   location: string
   signerName: string
   signatureImageId: string | null
+  /** Sistema de graduação sugerido para os lotes deste modelo. Ausente em modelos antigos. */
+  graduationSystemId?: string | null
 }
 
 export interface TemplateSource {

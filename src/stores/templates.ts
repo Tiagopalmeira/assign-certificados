@@ -52,7 +52,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       width: imported.width,
       height: imported.height,
       fields: [],
-      defaults: { date: todayIso(), location: '', signerName: '', signatureImageId: null },
+      defaults: { date: todayIso(), location: '', signerName: '', signatureImageId: null, graduationSystemId: null },
     }
     await templatesRepo.put(template)
     items.value.push(template)

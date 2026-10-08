@@ -18,7 +18,7 @@ const scale = computed(() => manualScale.value ?? fitScale.value)
 const zoomLabel = computed(() => `${Math.round((scale.value / fitScale.value) * 100)}%`)
 
 const systems = useGraduationSystemsStore()
-const values = computed(() => sampleValues(template.value.defaults, systems.fallback))
+const values = computed(() => sampleValues(template.value.defaults, systems.resolve(template.value.defaults.graduationSystemId)))
 
 const PADDING = 48
 

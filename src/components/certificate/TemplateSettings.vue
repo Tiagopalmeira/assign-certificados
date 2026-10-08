@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { MousePointerClick } from 'lucide-vue-next'
 import { useTemplateEditor } from '@/composables/useTemplateEditor'
 import { round } from '@/lib/geometry'
+import { useGraduationSystemsStore } from '@/stores/graduationSystems'
 
 /** Painel exibido quando nenhum campo está selecionado: dados gerais do modelo. */
 const editor = useTemplateEditor()
 const template = editor.template
 const defaults = computed(() => template.value.defaults)
+const systems = useGraduationSystemsStore()
+const system = computed(() => systems.resolve(defaults.value.graduationSystemId))
 
 const sourceDescription = computed(() => {
   const { source, width, height } = template.value
@@ -25,6 +29,18 @@ const sourceDescription = computed(() => {
 
     <section class="group">
       <h2 class="group__title">Dados do modelo</h2>
+      <div class="form-field">
+        <label class="form-label" for="tpl-system">Sistema de graduação</label>
+        <select
+          id="tpl-system"
+          class="select input--sm"
+          :value="system?.id"
+          @change="editor.updateDefaults({ graduationSystemId: ($event.target as HTMLSelectElement).value }); editor.commit()"
+        >
+          <option v-for="item in systems.sorted" :key="item.id" :value="item.id">{{ item.name }}</option>
+        </select>
+        <RouterLink to="/graduacoes" class="form-help">Criar ou editar sistemas de graduação</RouterLink>
+      </div>
       <div class="form-field">
         <label class="form-label" for="tpl-date">Data padrão</label>
         <input

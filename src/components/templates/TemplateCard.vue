@@ -11,7 +11,7 @@ const props = defineProps<{ template: CertificateTemplate }>()
 const emit = defineEmits<{ duplicate: []; remove: [] }>()
 
 const systems = useGraduationSystemsStore()
-const values = computed(() => sampleValues(props.template.defaults, systems.fallback))
+const values = computed(() => sampleValues(props.template.defaults, systems.resolve(props.template.defaults.graduationSystemId)))
 const created = computed(() => formatDateTime(props.template.createdAt))
 const updated = computed(() => formatDateTime(props.template.updatedAt))
 </script>
