@@ -33,6 +33,7 @@ import { resolveFieldText, isMultiline } from './fieldText'
 import { FAUX_BOLD_STROKE, FAUX_ITALIC_SKEW, loadFontBytes, loadFontkitFont, metricsFromFont, resolveFont } from './fonts'
 import { fontkit } from './fontkit'
 import { containRect, layoutText } from './textLayout'
+import { OUTLINE_WIDTH, colorRuns } from './colorRuns'
 import { signatureBoxes, type Box } from './geometry'
 import { sanitizeFileName, uniqueFileNames } from './filename'
 
@@ -44,6 +45,8 @@ export interface GenerationInput {
   /** Imagem de assinatura do lote (null = sem imagem). */
   signatureId: string | null
   students: Student[]
+  /** Título de cada graduação (ex.: { 'Branco': 'Mestre' }). */
+  graduationTitles?: Record<string, string>
   fonts: readonly FontVariant[]
   loadFile: (id: string) => Promise<Blob | undefined>
 }
@@ -173,24 +176,35 @@ async function drawTextBox(
   )
   const font = await embeddedFont(doc, res, resolved.variant)
   const fontKey = page.node.newFontDictionary(font.name, font.ref)
-  const { r, g, b } = hexToRgb(style.color)
   const skew = resolved.fauxItalic ? FAUX_ITALIC_SKEW : 0
 
-  for (const line of layout.lines) {
-    if (!line.text) continue
+  const drawRun = (text: string, x: number, y: number, color: string, mode: TextRenderingMode, lineWidth: number) => {
+    const { r, g, b } = hexToRgb(color)
     page.pushOperators(
       beginText(),
       setFontAndSize(fontKey, layout.fontSize),
       setCharacterSpacing(layout.letterSpacing),
       setFillingRgbColor(r, g, b),
       setStrokingRgbColor(r, g, b),
-      setTextRenderingMode(resolved.fauxBold ? TextRenderingMode.FillAndOutline : TextRenderingMode.Fill),
-      setLineWidth(layout.fontSize * FAUX_BOLD_STROKE),
+      setTextRenderingMode(mode),
+      setLineWidth(lineWidth),
       // Estamos num espaço com o eixo Y invertido (origem no topo); d = -1 desvira o glifo.
-      setTextMatrix(1, 0, skew, -1, box.x + line.x, box.y + line.baseline),
-      showText(font.encodeText(line.text)),
+      setTextMatrix(1, 0, skew, -1, x, y),
+      showText(font.encodeText(text)),
       endText(),
     )
+  }
+
+  for (const line of layout.lines) {
+    if (!line.text) continue
+    const y = box.y + line.baseline
+    for (const run of colorRuns(field, line.text, layout.fontSize, layout.letterSpacing, metrics)) {
+      const x = box.x + line.x + run.offset
+      // Contorno primeiro, preenchimento por cima: só a metade de fora do traço aparece.
+      if (run.outline) drawRun(run.text, x, y, run.outline, TextRenderingMode.Outline, layout.fontSize * OUTLINE_WIDTH)
+      const mode = resolved.fauxBold ? TextRenderingMode.FillAndOutline : TextRenderingMode.Fill
+      drawRun(run.text, x, y, run.color, mode, layout.fontSize * FAUX_BOLD_STROKE)
+    }
   }
 }
 
@@ -263,6 +277,7 @@ async function addCertificatePage(
   const values: CertificateValues = {
     name: student.name,
     graduation: student.graduation,
+    graduationTitle: input.graduationTitles?.[student.graduation] ?? '',
     date: input.date,
     location: input.location,
     signerName: input.signerName,

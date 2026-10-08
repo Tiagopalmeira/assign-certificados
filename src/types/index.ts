@@ -5,6 +5,9 @@ export type TextAlign = 'left' | 'center' | 'right'
 
 export type DateFormat = 'short' | 'long'
 
+/** Como o campo "Graduação" aparece: só a graduação, graduação com título ou só o título. */
+export type GraduationDisplay = 'graduation' | 'graduation-title' | 'title'
+
 export interface TextStyle {
   fontFamily: string
   fontSize: number
@@ -39,6 +42,10 @@ export interface CertificateField {
   /** Conteúdo do campo "Texto". Aceita {nome}, {graduacao}, {data}, {local}, {assinatura}. */
   text: string
   dateFormat: DateFormat
+  /** Campo "Graduação". Ausente em modelos antigos, que passam a mostrar graduação e título. */
+  graduationDisplay?: GraduationDisplay
+  /** Campo "Graduação": pinta cada cor (Verde, Amarelo…) com a própria cor. Padrão: sim. */
+  colorizeGraduation?: boolean
   /** Imagem fixa do campo "Imagem". */
   imageId: string | null
   /** Campo "Assinatura": exibe o nome de quem assina abaixo da imagem. */
@@ -111,6 +118,8 @@ export interface StudentGroup {
 export interface CertificateValues {
   name: string
   graduation: string
+  /** Título da graduação (ex.: "Instrutor"); vazio quando não há. */
+  graduationTitle: string
   date: string
   location: string
   signerName: string

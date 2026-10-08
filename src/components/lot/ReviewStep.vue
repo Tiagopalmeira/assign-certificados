@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import type { CertificateTemplate, CertificateValues } from '@/types'
 import { useLotStore } from '@/stores/lot'
+import { useGraduationsStore } from '@/stores/graduations'
 import EventSummary from './EventSummary.vue'
 import CertificatePreview from '@/components/certificate/CertificatePreview.vue'
 
@@ -10,6 +11,7 @@ const props = defineProps<{ template: CertificateTemplate }>()
 const emit = defineEmits<{ back: []; editEvent: []; finish: [] }>()
 
 const lot = useLotStore()
+const graduations = useGraduationsStore()
 const batch = computed(() => lot.toBatch(props.template))
 const students = computed(() => batch.value.students)
 const current = ref(0)
@@ -23,6 +25,7 @@ const previewValues = computed<CertificateValues>(() => {
   return {
     name: student.name,
     graduation: student.graduation,
+    graduationTitle: graduations.titleOf(student.graduation),
     date: batch.value.date,
     location: batch.value.location,
     signerName: batch.value.signerName,
@@ -45,7 +48,7 @@ const plural = (count: number) => (count === 1 ? '1 aluno' : `${count} alunos`)
           </p>
           <ul class="counts">
             <li v-for="item in lot.summary" :key="item.graduation">
-              <span>{{ item.graduation }}</span>
+              <span>{{ graduations.labelOf(item.graduation) }}</span>
               <span class="muted">{{ plural(item.count) }}</span>
             </li>
           </ul>
@@ -74,7 +77,7 @@ const plural = (count: number) => (count === 1 ? '1 aluno' : `${count} alunos`)
                       {{ student.name }}
                     </button>
                   </td>
-                  <td>{{ student.graduation }}</td>
+                  <td>{{ graduations.labelOf(student.graduation) }}</td>
                 </tr>
               </tbody>
             </table>

@@ -42,8 +42,8 @@ Atalhos no editor: `Ctrl+S` salva, `Ctrl+Z` / `Ctrl+Shift+Z` desfaz e refaz, as 
 movem o campo selecionado (com `Shift`, de 10 em 10), `Delete` exclui o campo e
 `Ctrl+D` duplica.
 
-No campo **Texto**, você pode usar `{nome}`, `{graduacao}`, `{data}`, `{local}` e
-`{assinatura}`. Exemplo: `Certificamos que {nome} recebeu a graduação {graduacao}.`
+No campo **Texto**, você pode usar `{nome}`, `{graduacao}`, `{titulo}`, `{data}`,
+`{local}` e `{assinatura}`. Exemplo: `Certificamos que {nome} recebeu a graduação {graduacao}.`
 
 ## Onde ficam os dados
 
@@ -101,9 +101,28 @@ os campos são escritos por cima.
 
 ### Graduações
 
-A lista inicial fica em `src/lib/graduations.ts` e é salva no banco na primeira
-execução. A store `useGraduationsStore` já tem `save(lista)`; para tornar a lista
-editável, falta só a tela.
+A lista inicial fica em `src/lib/graduations.ts`. Algumas graduações conferem um título:
+
+| Graduação | Título |
+|---|---|
+| Verde e Amarelo | Instrutor |
+| Verde, Amarelo e Azul | Formado |
+| Branco e Verde | Monitor |
+| Branco e Amarelo | Professor |
+| Branco e Azul | Contramestre |
+| Branco | Mestre |
+
+No editor, o campo **Graduação** tem a opção *Mostrar*: graduação e título
+("Verde e Amarelo - Instrutor", o padrão), só a graduação ou só o título. Graduações sem
+título mostram só a graduação. No campo **Texto**, use `{titulo}`.
+
+Cada cor no nome da graduação sai na própria cor (verde, amarelo, azul, branco). Amarelo
+e branco ganham um contorno fino na cor do campo para ficarem legíveis em papel claro. Dá
+para desligar isso no campo **Graduação** ("Pintar cada cor com a própria cor"). As cores
+ficam em `src/lib/colorRuns.ts`.
+
+A lista fica salva no banco. A store `useGraduationsStore` já tem `save(lista)`; para
+tornar a lista editável, falta só a tela.
 
 ## Limitações conhecidas
 

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { AlignCenter, AlignLeft, AlignRight, BringToFront, Copy, SendToBack, Trash2 } from 'lucide-vue-next'
-import type { CertificateField, TextAlign, TextStyle } from '@/types'
+import type { CertificateField, GraduationDisplay, TextAlign, TextStyle } from '@/types'
 import { fieldLabel } from '@/lib/fields'
 import { hasText, PLACEHOLDER_HELP } from '@/lib/fieldText'
 import { isValidHex } from '@/lib/color'
@@ -133,7 +133,31 @@ const imageUrl = computed(() => files.urlFor(props.field.imageId))
       <h3 class="group__title">Conteúdo</h3>
 
       <p v-if="field.type === 'name'" class="form-help">O nome de cada aluno é colocado aqui.</p>
-      <p v-if="field.type === 'graduation'" class="form-help">A graduação escolhida no lote é colocada aqui.</p>
+      <template v-if="field.type === 'graduation'">
+        <p class="form-help">A graduação escolhida no lote é colocada aqui.</p>
+        <div class="form-field">
+          <label class="form-label" :for="id('graduation-display')">Mostrar</label>
+          <select
+            :id="id('graduation-display')"
+            class="select input--sm"
+            :value="field.graduationDisplay ?? 'graduation-title'"
+            @change="editor.updateField(field.id, { graduationDisplay: ($event.target as HTMLSelectElement).value as GraduationDisplay }); editor.commit()"
+          >
+            <option value="graduation-title">Graduação e título (Verde e Amarelo - Instrutor)</option>
+            <option value="graduation">Só a graduação (Verde e Amarelo)</option>
+            <option value="title">Só o título (Instrutor)</option>
+          </select>
+          <span class="form-help">Graduações sem título mostram só a graduação.</span>
+        </div>
+        <label class="choice small">
+          <input
+            type="checkbox"
+            :checked="field.colorizeGraduation !== false"
+            @change="editor.updateField(field.id, { colorizeGraduation: ($event.target as HTMLInputElement).checked }); editor.commit()"
+          />
+          Pintar cada cor com a própria cor (verde, amarelo, azul, branco)
+        </label>
+      </template>
 
       <template v-if="field.type === 'date'">
         <div class="form-field">

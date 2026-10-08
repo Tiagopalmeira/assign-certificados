@@ -24,8 +24,8 @@ const uid = Math.random().toString(36).slice(2)
 
 const graduation = ref(
   props.initialGraduation ||
-    graduations.list.find((g) => !props.usedGraduations.includes(g)) ||
-    graduations.list[0] ||
+    graduations.names.find((g) => !props.usedGraduations.includes(g)) ||
+    graduations.names[0] ||
     '',
 )
 const text = ref(props.initialNames.join('\n'))
@@ -63,7 +63,7 @@ function submit() {
     <div class="form-field graduation">
       <label class="form-label" :for="`graduation-${uid}`">Graduação</label>
       <select :id="`graduation-${uid}`" v-model="graduation" class="select">
-        <option v-for="item in graduations.list" :key="item" :value="item">{{ item }}</option>
+        <option v-for="item in graduations.list" :key="item.name" :value="item.name">{{ graduations.labelOf(item.name) }}</option>
       </select>
       <p v-if="mergeNotice" class="form-help">{{ mergeNotice }}</p>
     </div>

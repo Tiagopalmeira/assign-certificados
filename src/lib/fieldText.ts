@@ -1,22 +1,33 @@
 import type { CertificateField, CertificateValues } from '@/types'
 import { formatDate } from './dates'
+import { graduationLabel } from './graduations'
 
 const PLACEHOLDERS: Record<string, (values: CertificateValues, field: CertificateField) => string> = {
   nome: (v) => v.name,
   graduacao: (v) => v.graduation,
   'graduação': (v) => v.graduation,
+  titulo: (v) => v.graduationTitle,
+  'título': (v) => v.graduationTitle,
   data: (v, f) => formatDate(v.date, f.dateFormat),
   local: (v) => v.location,
   assinatura: (v) => v.signerName,
 }
 
-export const PLACEHOLDER_HELP = '{nome}, {graduacao}, {data}, {local}, {assinatura}'
+export const PLACEHOLDER_HELP = '{nome}, {graduacao}, {titulo}, {data}, {local}, {assinatura}'
 
 function fillPlaceholders(text: string, values: CertificateValues, field: CertificateField): string {
   return text.replace(/\{([^{}]+)\}/g, (match, key: string) => {
     const resolver = PLACEHOLDERS[key.trim().toLowerCase()]
     return resolver ? resolver(values, field) : match
   })
+}
+
+/** Graduação como o campo pede. Sem título, mostra a graduação em qualquer opção. */
+export function graduationText(field: CertificateField, values: CertificateValues): string {
+  const display = field.graduationDisplay ?? 'graduation-title'
+  if (display === 'graduation' || !values.graduationTitle) return values.graduation
+  if (display === 'title') return values.graduationTitle
+  return graduationLabel(values.graduation, values.graduationTitle)
 }
 
 function withAffixes(field: CertificateField, value: string): string {
@@ -33,7 +44,7 @@ export function resolveFieldText(field: CertificateField, values: CertificateVal
     case 'name':
       return withAffixes(field, values.name)
     case 'graduation':
-      return withAffixes(field, values.graduation)
+      return withAffixes(field, graduationText(field, values))
     case 'date':
       return withAffixes(field, formatDate(values.date, field.dateFormat))
     case 'location':

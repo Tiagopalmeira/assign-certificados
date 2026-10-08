@@ -23,6 +23,7 @@ function summary(fieldId: string) {
   const text = resolveFieldText(field, {
     name: 'nome',
     graduation: 'graduação',
+    graduationTitle: 'título',
     date: editor.template.value.defaults.date,
     location: editor.template.value.defaults.location,
     signerName: editor.template.value.defaults.signerName,

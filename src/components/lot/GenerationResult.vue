@@ -6,6 +6,7 @@ import type { GeneratedCertificate } from '@/types'
 import { buildZip, downloadBlob, pdfBlob } from '@/lib/download'
 import { sanitizeFileName } from '@/lib/filename'
 import { errorMessage, useUiStore } from '@/stores/ui'
+import { useGraduationsStore } from '@/stores/graduations'
 
 const props = defineProps<{
   certificates: GeneratedCertificate[]
@@ -16,6 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{ newLot: [] }>()
 
 const ui = useUiStore()
+const graduations = useGraduationsStore()
 const zipping = ref(false)
 const combining = ref(false)
 
@@ -77,7 +79,7 @@ function downloadOne(certificate: GeneratedCertificate) {
         <li v-for="certificate in certificates" :key="certificate.fileName" class="file">
           <div class="file__info">
             <span class="file__name">{{ certificate.student.name }}</span>
-            <span class="muted small">{{ certificate.student.graduation }}, {{ certificate.fileName }}</span>
+            <span class="muted small">{{ graduations.labelOf(certificate.student.graduation) }}, {{ certificate.fileName }}</span>
           </div>
           <button type="button" class="btn btn--ghost btn--sm" :aria-label="`Baixar certificado de ${certificate.student.name}`" @click="downloadOne(certificate)">
             Baixar

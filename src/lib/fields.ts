@@ -28,6 +28,7 @@ export function sampleValues(defaults: TemplateDefaults): CertificateValues {
   return {
     name: 'Maria Oliveira Santos',
     graduation: 'Verde e Amarelo',
+    graduationTitle: 'Instrutor',
     date: defaults.date,
     location: defaults.location,
     signerName: defaults.signerName,
@@ -72,6 +73,8 @@ export function createField(type: FieldType, pageWidth: number, pageHeight: numb
     suffix: '',
     text: type === 'text' ? 'Certificamos que {nome} recebeu a graduação {graduacao}.' : '',
     dateFormat: 'short',
+    graduationDisplay: 'graduation-title',
+    colorizeGraduation: true,
     imageId: null,
     showSignerName: true,
   }

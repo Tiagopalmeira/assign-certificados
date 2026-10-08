@@ -5,6 +5,7 @@ import { resolveFieldText, isMultiline } from '@/lib/fieldText'
 import { layoutText } from '@/lib/textLayout'
 import { signatureBoxes, type Box } from '@/lib/geometry'
 import { FAUX_BOLD_STROKE } from '@/lib/fonts'
+import { OUTLINE_WIDTH, colorRuns } from '@/lib/colorRuns'
 import { fieldLabel } from '@/lib/fields'
 import { useFontsStore } from '@/stores/fonts'
 import { useFilesStore } from '@/stores/files'
@@ -60,22 +61,36 @@ const layout = computed(() => {
   )
 })
 
-const lines = computed(() => {
+/** Um <text> por trecho de cor, na mesma posição calculada para o PDF. */
+const runs = computed(() => {
   const box = boxes.value.caption
-  if (!layout.value || !box) return []
+  const metrics = font.value.metrics
+  if (!layout.value || !box || !metrics) return []
+  const { fontSize, letterSpacing } = layout.value
   return layout.value.lines
     .filter((line) => line.text)
-    .map((line) => {
-      const x = box.x + line.x
-      const y = box.y + line.baseline
-      return {
-        text: line.text,
-        x,
-        y,
-        transform: font.value.fauxItalic ? `translate(${x} ${y}) skewX(-12) translate(${-x} ${-y})` : undefined,
-      }
-    })
+    .flatMap((line) =>
+      colorRuns(props.field, line.text, fontSize, letterSpacing, metrics).map((run) => {
+        const x = box.x + line.x + run.offset
+        const y = box.y + line.baseline
+        return {
+          ...run,
+          x,
+          y,
+          transform: font.value.fauxItalic ? `translate(${x} ${y}) skewX(-12) translate(${-x} ${-y})` : undefined,
+        }
+      }),
+    )
 })
+
+function strokeOf(run: { color: string; outline: string | null }) {
+  if (!layout.value) return {}
+  if (run.outline) {
+    return { stroke: run.outline, 'stroke-width': layout.value.fontSize * OUTLINE_WIDTH, 'paint-order': 'stroke', 'stroke-linejoin': 'round' as const }
+  }
+  if (font.value.fauxBold) return { stroke: run.color, 'stroke-width': layout.value.fontSize * FAUX_BOLD_STROKE }
+  return {}
+}
 
 const transform = computed(() => {
   const f = props.field
@@ -109,19 +124,18 @@ const placeholderFontSize = computed(() => Math.max(6, Math.min(props.field.heig
       preserveAspectRatio="xMidYMid meet"
     />
     <text
-      v-for="(line, index) in lines"
+      v-for="(run, index) in runs"
       :key="index"
-      :x="line.x"
-      :y="line.y"
-      :transform="line.transform"
+      :x="run.x"
+      :y="run.y"
+      :transform="run.transform"
       :font-family="font.cssFamily"
       :font-size="layout!.fontSize"
       :letter-spacing="layout!.letterSpacing"
-      :fill="field.style.color"
-      :stroke="font.fauxBold ? field.style.color : undefined"
-      :stroke-width="font.fauxBold ? layout!.fontSize * FAUX_BOLD_STROKE : undefined"
+      :fill="run.color"
+      v-bind="strokeOf(run)"
       class="field-text"
-    >{{ line.text }}</text>
+    >{{ run.text }}</text>
     <g v-if="placeholderLabel" class="placeholder">
       <rect :width="field.width" :height="field.height" />
       <text :x="field.width / 2" :y="field.height / 2" :font-size="placeholderFontSize">{{ placeholderLabel }}</text>
